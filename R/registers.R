@@ -2,6 +2,8 @@
 #'
 #' Set registers and register actions
 #'
+#' In Vim-speak, `focus` is the unnamed register.
+#'
 #' @param name The binding name to focus on, as a string
 #' @return Invisible \code{NULL}
 #' @name registers

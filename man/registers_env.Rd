@@ -26,6 +26,8 @@ See registers
 \examples{
 
 registers_env()
-
+a <- 1
+set_focus("a")
+registers_env()
 
 }
