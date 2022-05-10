@@ -1,0 +1,27 @@
+Package: registers
+Type: Package
+Title: Registers for R
+Version: 0.0
+Authors@R: 
+    c(person(given = "James",
+           family = "Otto",
+           role = c("aut"),
+           email = "jamesotto852@gmail.com",
+           comment = c(ORCID = "0000-0002-0665-2515")),
+      person(given = "David",
+           family = "Kahle",
+           role = c("aut", "cre"),
+           email = "david@kahle.io",
+           comment = c(ORCID = "0000-0002-9999-1558")))
+Description: Registers for R.
+Imports:
+    cli,
+    dplyr,
+    glue,
+    utils,
+    rstudioapi
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+LazyData: true
+RoxygenNote: 7.1.2
