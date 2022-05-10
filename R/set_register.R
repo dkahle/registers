@@ -105,9 +105,15 @@ addin_set_focus_interactive <- function() {
 
 
 
+
+
+
+
+
 #' @rdname set_register
 #' @export
 glimpse_focus <- function() {
+
   f <- get("focus", envir = registers())
   data <- eval(parse(text = f$name), envir = f$envir)
 
@@ -115,31 +121,21 @@ glimpse_focus <- function() {
 
   if (inherits(data, "data.frame")) {
     dplyr::glimpse( data )
+  } else if (is.vector(data)) {
+    str(data)
+  } else if (is.function(data)) {
+    print(data)
   } else {
     dplyr::glimpse( dplyr::collect(data) )
   }
-  # cat("\n")
+  cat("\n")
+
 }
 
 
 
 
 
-#' @rdname set_register
-#' @export
-addin_glimpse_focus <- function() {
-  f <- get("focus", envir = registers())
-  data <- eval(parse(text = f$name), envir = f$envir)
-
-  cli_h1("Glimpsing `{f$name}` [{paste(class(data), collapse = ', ')}] :")
-
-  if (inherits(data, "data.frame")) {
-    dplyr::glimpse( data )
-  } else {
-    dplyr::glimpse( dplyr::collect(data) )
-  }
-  # cat("\n")
-}
 
 
 

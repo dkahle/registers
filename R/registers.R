@@ -12,6 +12,13 @@
 #' a <- 1
 #' set_focus("a")
 #' registers()
+#' f <- function(x) x^2
+#' set_focus("f")
+#' set_focus("plot")
+#'
+#' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
+#' # filter by "registers", change "Show registers" to Shift-Cmd-R
+#'
 #'
 
 
@@ -21,6 +28,16 @@ registers <- function() {
 
   if ( !registers_option_exists() ) reset_registers()
   getOption("registers")$env
+
+}
+
+
+
+#' @rdname registers
+#' @export
+addin_show_registers <- function() {
+
+  print.registers(registers())
 
 }
 
@@ -50,7 +67,7 @@ print.registers <- function(x, ...) {
   register_names <- ls(registers())
   if (length(register_names) > 0) {
     cli_div(theme = list(
-      span.register = list(color = "orange"),
+      span.register = list(color = "firebrick"),
       span.binding = list(color = "black"),
       span.env= list(color = "gray")
     ))
@@ -65,5 +82,6 @@ print.registers <- function(x, ...) {
     cli_text("{.key No bindings are registered.}")
     cli_end()
   }
-
+  cat("\n")
+  x
 }

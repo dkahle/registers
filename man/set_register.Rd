@@ -6,7 +6,6 @@
 \alias{addin_set_focus}
 \alias{addin_set_focus_interactive}
 \alias{glimpse_focus}
-\alias{addin_glimpse_focus}
 \alias{addin_glimpse_highlighted}
 \title{Registers}
 \usage{
@@ -17,8 +16,6 @@ addin_set_focus()
 addin_set_focus_interactive()
 
 glimpse_focus()
-
-addin_glimpse_focus()
 
 addin_glimpse_highlighted()
 }

@@ -10,10 +10,15 @@ Interactive: true
 
 Name: Glimpse focus
 Description: glimpse() focused dataset
-Binding: addin_glimpse_focus
+Binding: glimpse_focus
 Interactive: false
 
 Name: Glimpse highlighted
 Description: glimpse() highlighted dataset
 Binding: addin_glimpse_highlighted
+Interactive: false
+
+Name: Show registers
+Description: Show registers
+Binding: addin_show_registers
 Interactive: false
