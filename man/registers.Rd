@@ -3,66 +3,35 @@
 \docType{package}
 \name{registers}
 \alias{registers}
-\alias{set_focus}
-\alias{addin_set_focus}
-\alias{addin_set_focus_interactive}
-\alias{glimpse_focus}
-\alias{addin_glimpse_focus}
-\alias{addin_glimpse_highlighted}
+\alias{reset_registers}
+\alias{print.registers}
 \alias{package-registers}
-\title{Registers}
+\title{Registers environment}
 \usage{
-set_focus(name)
+registers()
 
-addin_set_focus()
+reset_registers()
 
-addin_set_focus_interactive()
-
-glimpse_focus()
-
-addin_glimpse_focus()
-
-addin_glimpse_highlighted()
+\method{print}{registers}(x, ...)
 }
 \arguments{
-\item{name}{The binding name to focus on, as a string}
+\item{x}{An object of class \code{registers}}
+
+\item{...}{Additional arguments to pass to \code{\link[=cat]{cat()}}}
 }
 \value{
 Invisible \code{NULL}
 }
 \description{
-Set registers and register actions
+See registers
 
 Registers for R
 }
-\details{
-In Vim-speak, \code{focus} is the unnamed register.
-}
 \examples{
 
-registers_env()
-
-set_focus("cars")
-glimpse_focus()
-
-# in RStudio, go to Tools > Modify Keyboard Shortcuts...
-# next to Set focus, use Alt-Shift-Cmd-F
-# next to Glimpse focus, use Shift-Cmd-G
-# next to Set focus interactively, use Alt-Shift-F
-
-airquality
-# highlight airquality above and push Alt-Shift-Cmd-F
-
-# press Shift-Cmd-G
-
-# in Tools > Modify Keyboard Shortcuts...,
-# set Glimpse highlighted to Alt-Shift-H, then highlight the line below and
-# press Alt-Shift-H
-(a <- rnorm(1))
-# now evaluate this:
-a
-
-
-
+registers()
+a <- 1
+set_focus("a")
+registers()
 
 }

@@ -6,10 +6,10 @@
 #'
 #' @param name The binding name to focus on, as a string
 #' @return Invisible \code{NULL}
-#' @name registers
+#' @name set_register
 #' @examples
 #'
-#' registers_env()
+#' registers()
 #'
 #' set_focus("cars")
 #' glimpse_focus()
@@ -41,7 +41,7 @@
 
 
 
-#' @rdname registers
+#' @rdname set_register
 #' @export
 set_focus <- function(name) {
 
@@ -51,7 +51,7 @@ set_focus <- function(name) {
       "name" = name,
       "envir" = parent.frame()
     ),
-    "envir" = registers_env()
+    "envir" = registers()
   )
 
 }
@@ -60,7 +60,7 @@ set_focus <- function(name) {
 
 
 
-#' @rdname registers
+#' @rdname set_register
 #' @export
 addin_set_focus <- function() {
 
@@ -75,14 +75,14 @@ addin_set_focus <- function() {
       "name" = as.name(context$selection[[1]]$text),
       "envir" = parent.frame()
     ),
-    "envir" = registers_env()
+    "envir" = registers()
   )
 
 }
 
 
 
-#' @rdname registers
+#' @rdname set_register
 #' @export
 addin_set_focus_interactive <- function() {
 
@@ -97,7 +97,7 @@ addin_set_focus_interactive <- function() {
       "name" = as.name(response),
       "envir" = parent.frame()
     ),
-    "envir" = registers_env()
+    "envir" = registers()
   )
 
 }
@@ -105,10 +105,10 @@ addin_set_focus_interactive <- function() {
 
 
 
-#' @rdname registers
+#' @rdname set_register
 #' @export
 glimpse_focus <- function() {
-  f <- get("focus", envir = registers_env())
+  f <- get("focus", envir = registers())
   data <- eval(parse(text = f$name), envir = f$envir)
 
   cli_h1("Glimpsing `{f$name}` [{paste(class(data), collapse = ', ')}] :")
@@ -125,10 +125,10 @@ glimpse_focus <- function() {
 
 
 
-#' @rdname registers
+#' @rdname set_register
 #' @export
 addin_glimpse_focus <- function() {
-  f <- get("focus", envir = registers_env())
+  f <- get("focus", envir = registers())
   data <- eval(parse(text = f$name), envir = f$envir)
 
   cli_h1("Glimpsing `{f$name}` [{paste(class(data), collapse = ', ')}] :")
@@ -143,7 +143,7 @@ addin_glimpse_focus <- function() {
 
 
 
-#' @rdname registers
+#' @rdname set_register
 #' @export
 addin_glimpse_highlighted <- function() {
 

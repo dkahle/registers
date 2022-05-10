@@ -1,6 +1,6 @@
 .onAttach <- function(...) {
 
-  reset_registers_env()
+  reset_registers()
 
 }
 
