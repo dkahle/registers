@@ -123,15 +123,8 @@ glimpse_focus <- function() {
 
   cli_h1("`{f$name}` [{paste(class(data), collapse = ', ')}]")
 
-  if (inherits(data, "data.frame")) {
-    dplyr::glimpse( data )
-  } else if (is.vector(data)) {
-    str(data)
-  } else if (is.function(data)) {
-    print(data)
-  } else {
-    dplyr::glimpse( dplyr::collect(data) )
-  }
+  glimpse(data)
+
   cat("\n")
 
 }
@@ -156,15 +149,7 @@ glimpse_highlighted <- function() {
 
   cli_h1("Glimpsing highlighted object [{paste(class(data), collapse = ', ')}]")
 
-  if (inherits(data, "data.frame")) {
-    dplyr::glimpse( data )
-  } else if (is.vector(data)) {
-    str(data)
-  } else if (is.function(data)) {
-    print(data)
-  } else {
-    dplyr::glimpse( dplyr::collect(data) )
-  }
+  glimpse(data)
 
   cat("\n")
 }
