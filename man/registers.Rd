@@ -3,7 +3,7 @@
 \docType{package}
 \name{registers}
 \alias{registers}
-\alias{addin_show_registers}
+\alias{show_registers}
 \alias{reset_registers}
 \alias{print.registers}
 \alias{package-registers}
@@ -11,7 +11,7 @@
 \usage{
 registers()
 
-addin_show_registers()
+show_registers()
 
 reset_registers()
 
@@ -36,9 +36,14 @@ registers()
 a <- 1
 set_focus("a")
 registers()
+
+# in RStudio, go to Tools > Modify Keyboard Shortcuts...
+# set registers to Alt-Shift-Cmd-R
+# try Alt-Shift-Cmd-R
+
 f <- function(x) x^2
 set_focus("f")
-set_focus("print")
+set_focus("plot")
 
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
 # filter by "registers", change "Show registers" to Shift-Cmd-R

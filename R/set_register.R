@@ -15,21 +15,25 @@
 #' glimpse_focus()
 #'
 #' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
-#' # next to Set focus, use Alt-Shift-Cmd-F
+#' # next to Set focus - highlighted, use Alt-Shift-Cmd-F
+#' # next to Set focus - window, use Alt-F
 #' # next to Glimpse focus, use Shift-Cmd-G
-#' # next to Set focus interactively, use Alt-Shift-F
+#'
+#' # press Shift-Cmd-G
 #'
 #' airquality
 #' # highlight airquality above and push Alt-Shift-Cmd-F
-#'
 #' # press Shift-Cmd-G
 #'
 #' # in Tools > Modify Keyboard Shortcuts...,
 #' # set Glimpse highlighted to Alt-Shift-H, then highlight the line below and
-#' # press Alt-Shift-H
-#' (a <- rnorm(1))
-#' # now evaluate this:
-#' a
+#' # press Shift-Cmd-H
+#' subset(cars, speed > 10)
+#'
+#' # interesting use case: generate a random subsample (that has a desired property)
+#' # and save it. highlight the whole next line and Shift-Cmd-H
+#' (cars_sample <- cars[sample(nrow(cars), 5),])
+#' cars_sample
 #'
 #'
 #'
@@ -62,7 +66,7 @@ set_focus <- function(name) {
 
 #' @rdname set_register
 #' @export
-addin_set_focus <- function() {
+set_focus_highlighted <- function() {
 
   context <- rstudioapi::getActiveDocumentContext()
 
@@ -84,7 +88,7 @@ addin_set_focus <- function() {
 
 #' @rdname set_register
 #' @export
-addin_set_focus_interactive <- function() {
+set_focus_window <- function() {
 
   response <- rstudioapi::showPrompt(
     title = "Set focus",
@@ -117,7 +121,7 @@ glimpse_focus <- function() {
   f <- get("focus", envir = registers())
   data <- eval(parse(text = f$name), envir = f$envir)
 
-  cli_h1("Glimpsing `{f$name}` [{paste(class(data), collapse = ', ')}] :")
+  cli_h1("`{f$name}` [{paste(class(data), collapse = ', ')}]")
 
   if (inherits(data, "data.frame")) {
     dplyr::glimpse( data )
@@ -141,23 +145,28 @@ glimpse_focus <- function() {
 
 #' @rdname set_register
 #' @export
-addin_glimpse_highlighted <- function() {
+glimpse_highlighted <- function() {
 
   context <- rstudioapi::getActiveDocumentContext()
+
   data <- eval(
     parse(text = context$selection[[1]]$text),
     envir = parent.frame()
   )
 
-  message(
-    glue::glue("Glimpsing highlighted object [{paste(class(data), collapse = ', ')}] :")
-  )
+  cli_h1("Glimpsing highlighted object [{paste(class(data), collapse = ', ')}]")
 
-  if (inherits(data, "data.frame")) dplyr::glimpse( data )
-    else if (inherits(data, "ArrowObject")) dplyr::glimpse( dplyr::collect(data) )
-      else str(data)
+  if (inherits(data, "data.frame")) {
+    dplyr::glimpse( data )
+  } else if (is.vector(data)) {
+    str(data)
+  } else if (is.function(data)) {
+    print(data)
+  } else {
+    dplyr::glimpse( dplyr::collect(data) )
+  }
 
-  # cat("\n")
+  cat("\n")
 }
 
 

@@ -12,6 +12,11 @@
 #' a <- 1
 #' set_focus("a")
 #' registers()
+#'
+#' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
+#' # set registers to Alt-Shift-Cmd-R
+#' # try Alt-Shift-Cmd-R
+#'
 #' f <- function(x) x^2
 #' set_focus("f")
 #' set_focus("plot")
@@ -35,7 +40,7 @@ registers <- function() {
 
 #' @rdname registers
 #' @export
-addin_show_registers <- function() {
+show_registers <- function() {
 
   print.registers(registers())
 
@@ -63,7 +68,7 @@ reset_registers <- function() {
 #' @rdname registers
 #' @export
 print.registers <- function(x, ...) {
-  cli_h1("Registers:")
+  cli_h1("Registers")
   register_names <- ls(registers())
   if (length(register_names) > 0) {
     cli_div(theme = list(

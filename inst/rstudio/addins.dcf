@@ -1,24 +1,24 @@
-Name: Set focus
-Description: Set focus
-Binding: addin_set_focus
+Name: Set focus - highlighted
+Description: Set focus on highlighted binding
+Binding: set_focus_highlighted
 Interactive: false
 
-Name: Set focus interactively
-Description: Set focus interactively
-Binding: addin_set_focus_interactive
+Name: Set focus - window
+Description: Set focus via a windowed prompt
+Binding: set_focus_window
 Interactive: true
 
 Name: Glimpse focus
-Description: glimpse() focused dataset
+Description: glimpse() focused binding
 Binding: glimpse_focus
 Interactive: false
 
 Name: Glimpse highlighted
-Description: glimpse() highlighted dataset
-Binding: addin_glimpse_highlighted
+Description: glimpse() highlighted binding
+Binding: glimpse_highlighted
 Interactive: false
 
 Name: Show registers
 Description: Show registers
-Binding: addin_show_registers
+Binding: show_registers
 Interactive: false

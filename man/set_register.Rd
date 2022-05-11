@@ -3,21 +3,21 @@
 \name{set_register}
 \alias{set_register}
 \alias{set_focus}
-\alias{addin_set_focus}
-\alias{addin_set_focus_interactive}
+\alias{set_focus_highlighted}
+\alias{set_focus_window}
 \alias{glimpse_focus}
-\alias{addin_glimpse_highlighted}
+\alias{glimpse_highlighted}
 \title{Registers}
 \usage{
 set_focus(name)
 
-addin_set_focus()
+set_focus_highlighted()
 
-addin_set_focus_interactive()
+set_focus_window()
 
 glimpse_focus()
 
-addin_glimpse_highlighted()
+glimpse_highlighted()
 }
 \arguments{
 \item{name}{The binding name to focus on, as a string}
@@ -39,21 +39,25 @@ set_focus("cars")
 glimpse_focus()
 
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
-# next to Set focus, use Alt-Shift-Cmd-F
+# next to Set focus - highlighted, use Alt-Shift-Cmd-F
+# next to Set focus - window, use Alt-F
 # next to Glimpse focus, use Shift-Cmd-G
-# next to Set focus interactively, use Alt-Shift-F
+
+# press Shift-Cmd-G
 
 airquality
 # highlight airquality above and push Alt-Shift-Cmd-F
-
 # press Shift-Cmd-G
 
 # in Tools > Modify Keyboard Shortcuts...,
 # set Glimpse highlighted to Alt-Shift-H, then highlight the line below and
-# press Alt-Shift-H
-(a <- rnorm(1))
-# now evaluate this:
-a
+# press Shift-Cmd-H
+subset(cars, speed > 10)
+
+# interesting use case: generate a random subsample (that has a desired property)
+# and save it. highlight the whole next line and Shift-Cmd-H
+(cars_sample <- cars[sample(nrow(cars), 5),])
+cars_sample
 
 
 
