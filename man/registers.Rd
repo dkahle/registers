@@ -6,6 +6,8 @@
 \alias{show_registers}
 \alias{reset_registers}
 \alias{print.registers}
+\alias{track_assignment}
+\alias{untrack_assignment}
 \alias{package-registers}
 \title{Registers environment}
 \usage{
@@ -16,11 +18,18 @@ show_registers()
 reset_registers()
 
 \method{print}{registers}(x, ...)
+
+track_assignment(symb = c("<-", "<+"))
+
+untrack_assignment()
 }
 \arguments{
 \item{x}{An object of class \code{registers}}
 
 \item{...}{Additional arguments to pass to \code{\link[=cat]{cat()}}}
+
+\item{symb}{Symbol to use for tracked assignment, either \code{"<+"} (default) or
+\code{"<-"}}
 }
 \value{
 Invisible \code{NULL}
@@ -47,6 +56,19 @@ set_focus("plot")
 
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
 # filter by "registers", change "Show registers" to Shift-Cmd-R
+
+track_assignment()
+a <+ 1
+.
+b <+ 2
+.
+..
+c <+ 3
+.
+..
+._3
+c(._1, ._2, ._3)
+untrack_assignment()
 
 
 }
