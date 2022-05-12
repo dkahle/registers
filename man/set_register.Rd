@@ -34,8 +34,8 @@ In Vim-speak, \code{focus} is the unnamed register.
 \examples{
 
 registers()
-
 set_focus("cars")
+registers()
 glimpse_focus()
 
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
@@ -53,6 +53,7 @@ airquality
 # set Glimpse highlighted to Alt-Shift-H, then highlight the line below and
 # press Shift-Cmd-H
 subset(cars, speed > 10)
+
 
 # interesting use case: generate a random subsample (that has a desired property)
 # and save it. highlight the whole next line and Shift-Cmd-H

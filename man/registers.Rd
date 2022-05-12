@@ -28,8 +28,8 @@ untrack_assignment()
 
 \item{...}{Additional arguments to pass to \code{\link[=cat]{cat()}}}
 
-\item{symb}{Symbol to use for tracked assignment, either \code{"<+"} (default) or
-\code{"<-"}}
+\item{symb}{Symbol to use for tracked assignment, either \code{"<-"} (default) or
+\code{"<+"}}
 }
 \value{
 Invisible \code{NULL}
@@ -45,6 +45,8 @@ registers()
 a <- 1
 set_focus("a")
 registers()
+show_registers()
+ls(registers())
 
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
 # set registers to Alt-Shift-Cmd-R
@@ -58,17 +60,36 @@ set_focus("plot")
 # filter by "registers", change "Show registers" to Shift-Cmd-R
 
 track_assignment()
-a <+ 1
+ls()
+ls(all.names = TRUE)
+registers()
+a <- 1
 .
-b <+ 2
+b <- 2
 .
 ..
-c <+ 3
+registers()
+c <- 3
 .
 ..
-._3
 c(._1, ._2, ._3)
+f <- function(x, y) {
+  x + y
+}
+e <- new.env()
+df <- cars
+registers()
+
+if (FALSE) { # oddities
+  ..
+  .. <- 10
+  .
+
+  x <- 1:3
+  .
+  x[1] <- 2
+  x # unchanged
+  . # yet 2 was evaluated and stored
+}
 untrack_assignment()
-
-
 }

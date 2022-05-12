@@ -10,8 +10,8 @@
 #' @examples
 #'
 #' registers()
-#'
 #' set_focus("cars")
+#' registers()
 #' glimpse_focus()
 #'
 #' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
@@ -29,6 +29,7 @@
 #' # set Glimpse highlighted to Alt-Shift-H, then highlight the line below and
 #' # press Shift-Cmd-H
 #' subset(cars, speed > 10)
+#'
 #'
 #' # interesting use case: generate a random subsample (that has a desired property)
 #' # and save it. highlight the whole next line and Shift-Cmd-H
@@ -72,14 +73,12 @@ set_focus_highlighted <- function() {
 
   cli_alert_success("Focusing on `{context$selection[[1]]$text}`...")
 
-  assign(
-    "x" = "focus",
-    "value" = list(
-      # "name" = substitute(data_binding),
+  rset(
+    "focus",
+    list(
       "name" = as.name(context$selection[[1]]$text),
       "envir" = parent.frame()
-    ),
-    "envir" = registers()
+    )
   )
 
 }
@@ -118,13 +117,19 @@ set_focus_window <- function() {
 #' @export
 glimpse_focus <- function() {
 
-  f <- get("focus", envir = registers())
+  if (!rexists("focus")) {
+    # if you stop(), the addin will pop a window
+    cli_alert_danger("No focus has been set.")
+    return(invisible(NULL))
+  }
+  f <- rget("focus")
   data <- eval(parse(text = f$name), envir = f$envir)
 
-  cli_h1("`{f$name}` [{paste(class(data), collapse = ', ')}]")
+  title <- glue("`{f$name}` [{paste(class(data), collapse = ', ')}]")
 
   if (inherits(data, "data.frame")) {
-    dplyr::glimpse( data )
+    msg <- capture.output(dplyr::glimpse(data))
+    print(boxx(msg, header = title, padding = 0))
   } else if (is.vector(data)) {
     str(data)
   } else if (is.function(data)) {
@@ -132,12 +137,8 @@ glimpse_focus <- function() {
   } else {
     dplyr::glimpse( dplyr::collect(data) )
   }
-  cat("\n")
 
 }
-
-
-
 
 
 
@@ -148,16 +149,16 @@ glimpse_focus <- function() {
 glimpse_highlighted <- function() {
 
   context <- rstudioapi::getActiveDocumentContext()
+  highlighted_text <- context$selection[[1]]$text
+  highlighted_text <- text_squeeze(highlighted_text)
+  data <- eval(parse(text = highlighted_text), envir = parent.frame())
+  title <- paste0("`", ez_trunc(highlighted_text, width = console_width() - 10), "`")
 
-  data <- eval(
-    parse(text = context$selection[[1]]$text),
-    envir = parent.frame()
-  )
-
-  cli_h1("Glimpsing highlighted object [{paste(class(data), collapse = ', ')}]")
+  # cli_h1("Glimpsing highlighted object [{paste(class(data), collapse = ', ')}]")
 
   if (inherits(data, "data.frame")) {
-    dplyr::glimpse( data )
+    msg <- capture.output(dplyr::glimpse(data))
+    print(boxx(msg, header = title, padding = 0))
   } else if (is.vector(data)) {
     str(data)
   } else if (is.function(data)) {
@@ -166,8 +167,6 @@ glimpse_highlighted <- function() {
     dplyr::glimpse( dplyr::collect(data) )
   }
 
-  cat("\n")
 }
-
 
 
