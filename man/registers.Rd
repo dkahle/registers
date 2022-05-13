@@ -8,6 +8,15 @@
 \alias{print.registers}
 \alias{track_assignment}
 \alias{untrack_assignment}
+\alias{register_inline_summary}
+\alias{register_inline_summary.character}
+\alias{register_inline_summary.numeric}
+\alias{register_inline_summary.logical}
+\alias{register_inline_summary.function}
+\alias{register_inline_summary.environment}
+\alias{register_inline_summary.tbl_df}
+\alias{register_inline_summary.data.frame}
+\alias{register_inline_summary.default}
 \alias{package-registers}
 \title{Registers environment}
 \usage{
@@ -22,6 +31,24 @@ reset_registers()
 track_assignment(symb = c("<-", "<+"))
 
 untrack_assignment()
+
+register_inline_summary(x, ...)
+
+\method{register_inline_summary}{character}(x, ...)
+
+\method{register_inline_summary}{numeric}(x, ...)
+
+\method{register_inline_summary}{logical}(x, ...)
+
+\method{register_inline_summary}{`function`}(x, ...)
+
+\method{register_inline_summary}{environment}(x, ...)
+
+\method{register_inline_summary}{tbl_df}(x, ...)
+
+\method{register_inline_summary}{data.frame}(x, ...)
+
+\method{register_inline_summary}{default}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{registers}}
@@ -76,9 +103,11 @@ c(._1, ._2, ._3)
 f <- function(x, y) {
   x + y
 }
-e <- new.env()
+e <- list2env(list(a = 1, b = 2))
 df <- cars
 registers()
+
+
 
 if (FALSE) { # oddities
   ..

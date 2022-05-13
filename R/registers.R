@@ -45,9 +45,11 @@
 #' f <- function(x, y) {
 #'   x + y
 #' }
-#' e <- new.env()
+#' e <- list2env(list(a = 1, b = 2))
 #' df <- cars
 #' registers()
+#'
+#'
 #'
 #' if (FALSE) { # oddities
 #'   ..
@@ -121,23 +123,7 @@ print.registers <- function(x, ...) {
     for (register in register_names) {
       if (register %in% history_symbols) {
         value <- rget(register)
-        value_to_show <- switch(class(value)[1],
-          "function" = {
-            chrs <- ez_trim(text_squeeze(deparse(body(value))))
-            if (chrs[1] == "{") chrs <- chrs[-c(1, length(chrs))]
-            chrs <- paste("<function>", paste(chrs, collapse = ";  "))
-            ez_trunc(chrs, console_width() - 5L)
-          },
-          "logical"   = ez_trunc(paste(value, collapse = ", "), console_width() - 5L),
-          "integer"   = ez_trunc(paste(value, collapse = ", "), console_width() - 5L),
-          "numeric"   = ez_trunc(paste(value, collapse = ", "), console_width() - 5L),
-          "character" = ez_trunc(paste(value, collapse = ", "), console_width() - 5L),
-          "environment" = capture.output(print(value)),
-          "data.frame" = ez_trunc(glue("<{nrow(value)} \U00D7 {ncol(value)} data frame> {paste(names(value), collapse = ', ')}"), console_width() - 5L),
-          "tbl_df" = ez_trunc(glue("<{nrow(value)} \U00D7 {ncol(value)} tibble> {paste(names(value), collapse = ', ')}"), console_width() - 5L),
-          class(value)
-        )
-        cli_alert("{.emph {.register {register}}}: {.value {value_to_show}}")
+        cli_alert("{.emph {.register {register}}}: {.value {register_inline_summary(value)}}")
       } else {
         name <- rget(register)$name
         envir <- rget(register)$envir
@@ -279,5 +265,174 @@ untrack_assignment <- function() {
   if (exists(  "<", envir = .GlobalEnv, inherits = FALSE)) rm("<",  envir = .GlobalEnv)
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary <- function(x, ...) {
+  UseMethod("register_inline_summary")
+}
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.character <- function(x, ...) {
+  n <- length(x)
+  ez_trunc(
+    if (n == 0L) {
+      "character(0)"
+    } else if (n == 1L) {
+      paste(glue("chr"), paste(x, collapse = ", "))
+    } else {
+      paste(glue("chr[1:{n}]"), paste(x, collapse = ", "))
+    },
+    console_width() - 5L
+  )
+}
+# register_inline_summary(character(0))
+# register_inline_summary("a")
+# register_inline_summary(sample(letters, 100, rep = TRUE))
+# register_inline_summary(sample(c(letters, NA), 100, rep = TRUE))
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.numeric <- function(x, ...) {
+  n <- length(x)
+  ez_trunc(
+    if (n == 0L) {
+      "numeric(0)"
+    } else if (n == 1L) {
+      paste(glue("num"), paste(round(x, digits = 3), collapse = ", "))
+    } else {
+      paste(glue("num[1:{n}]"), paste(round(x, digits = 3), collapse = ", "))
+    },
+    console_width() - 5L
+  )
+}
+# register_inline_summary(numeric(0))
+# register_inline_summary(rnorm(1))
+# register_inline_summary(rnorm(100))
+# register_inline_summary(sample(c(rnorm(4), NA), 100, TRUE))
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.logical <- function(x, ...) {
+  n <- length(x)
+  ez_trunc(
+    if (n == 0L) {
+      "logical(0)"
+    } else if (n == 1L) {
+      paste(glue("logi"), paste(x, collapse = ", "))
+    } else {
+      paste(glue("logi[1:{n}]"), paste(x, collapse = ", "))
+    },
+    console_width() - 5L
+  )
+}
+# register_inline_summary(logical(0))
+# register_inline_summary(TRUE)
+# register_inline_summary(FALSE)
+# register_inline_summary(sample(c(T, F, NA), 100, TRUE))
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.function <- function(x, ...) {
+
+  formal_args_names <- names(formals(x))
+
+  chrs <- ez_trim(text_squeeze(deparse(body(x))))
+  inline <- !(chrs[1] == "{")
+  if (!inline) chrs <- chrs[-c(1, length(chrs))]
+  chrs <- paste(
+    glue("function({paste(formal_args_names, collapse = ',')})"),
+    if (!inline) "{",
+    paste(chrs, collapse = ";  "),
+    if (!inline) "}"
+  )
+  ez_trunc(chrs, console_width() - 5L)
+}
+# f <- function(x) x^2
+# register_inline_summary(f)
+# g <- function(x, y) {
+#   z <- x + y
+#   y^2
+# }
+# register_inline_summary(g)
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.environment <- function(x, ...) {
+
+  ez_trunc(
+    paste(
+      capture.output(print(x)),
+      paste(ls(x), collapse = ", ")
+    ),
+    console_width() - 5L
+  )
+
+}
+# register_inline_summary(new.env())
+# register_inline_summary(environment(registers))
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.tbl_df <- function(x, ...) {
+
+  ez_trunc(
+    glue("tibble [{nrow(x)} \U00D7 {ncol(x)}] {paste(names(x), collapse = ', ')}"),
+    console_width() - 5L
+  )
+
+}
+# register_inline_summary(ggplot2::diamonds)
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.data.frame <- function(x, ...) {
+
+  ez_trunc(
+    glue("data.frame [{nrow(x)} \U00D7 {ncol(x)}] {paste(names(x), collapse = ', ')}"),
+    console_width() - 5L
+  )
+
+}
+# register_inline_summary(cars)
+
+
+
+#' @rdname registers
+#' @export
+register_inline_summary.default <- function(x, ...) {
+
+  if (is.null(x)) return("NULL")
+
+}
+# register_inline_summary(NULL)
+
+
 
 
