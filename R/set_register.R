@@ -223,7 +223,7 @@ set_focus <- function(x) {
 
   eval(
     substitute(
-      set_register(x, "f", clobber = TRUE, envir = parent.frame(n = 3))
+      registers::set_register(x, "f", clobber = TRUE, envir = parent.frame(n = 3))
     ),
     envir = parent.frame()
   )
@@ -243,7 +243,7 @@ set_focus_highlighted <- function() {
 
   eval(
     substitute(
-      set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
+      registers::set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
       list(expr = as.name(x))
     ),
     envir = parent.frame()
@@ -266,7 +266,7 @@ set_focus_window <- function() {
 
   eval(
     substitute(
-      set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
+      registers::set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
       list(expr = as.name(x))
     ),
     envir = parent.frame()
