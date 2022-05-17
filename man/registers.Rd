@@ -20,8 +20,6 @@
 \alias{set_registers_option}
 \alias{get_registers_option}
 \alias{print.registers}
-\alias{track_assignment}
-\alias{untrack_assignment}
 \alias{package-registers}
 \title{Registers inline summaries}
 \usage{
@@ -56,18 +54,13 @@ set_registers_option(...)
 get_registers_option(option)
 
 \method{print}{registers}(x, ...)
-
-track_assignment(symb = c("<-", "<+"))
-
-untrack_assignment()
 }
 \arguments{
 \item{x}{An object of class \code{registers}}
 
-\item{...}{Additional arguments to pass to \code{\link[=cat]{cat()}}}
+\item{...}{Additional arguments}
 
-\item{symb}{Symbol to use for tracked assignment, either \code{"<-"} (default) or
-\code{"<+"}}
+\item{option}{A named registers option to retrieve}
 }
 \value{
 \code{x}
@@ -117,57 +110,23 @@ a <- 1
 set_focus("a")
 registers()
 show_registers()
-register_keys()
 ls(registers())
 
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
-# set registers to Alt-Shift-Cmd-R
-# try Alt-Shift-Cmd-R
+# set Show registers to Alt-Shift-Cmd-R, Apply, then try it
 
-f <- function(x) x^2
-set_focus("f")
-set_focus("plot")
-
-# in RStudio, go to Tools > Modify Keyboard Shortcuts...
-# filter by "registers", change "Show registers" to Shift-Cmd-R
-
-track_assignment()
-ls()
-ls(all.names = TRUE)
+reset_registers()
 registers()
-a <- 1
-.
-b <- 2
-.
-..
-registers()
-c <- 3
-.
-..
-c(._1, ._2, ._3)
-f <- function(x, y = 1) {
-  x + y
+
+get_registers_option("clobber")
+set_registers_option("clobber" = FALSE)
+get_registers_option("clobber")
+set_registers_option("clobber" = FALSE)
+get_registers_option("clobber")
+reset_registers()
+get_registers_option("clobber")
+
 }
-e <- list2env(list(a = 1, b = 2))
-o <- options()
-l <- list(1, 2, 3)
-df <- cars
-registers()
-rm(a, b, c, f, e, o, l, df)
-ls()
-registers()
-
-
-if (FALSE) { # oddities
-  ..
-  .. <- 10
-  .
-
-  x <- 1:3
-  .
-  x[1] <- 2
-  x # unchanged
-  . # yet 2 was evaluated and stored
-}
-untrack_assignment()
+\seealso{
+\code{\link[=set_register]{set_register()}}
 }

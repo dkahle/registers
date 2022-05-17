@@ -10,6 +10,9 @@
 #'
 #' spy(cars)
 #'
+#' # Shift-Cmd-H
+#' cars
+#'
 
 
 

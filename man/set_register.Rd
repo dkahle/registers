@@ -2,8 +2,6 @@
 % Please edit documentation in R/set_register.R, R/spy.R
 \name{set_register}
 \alias{set_register}
-\alias{set_static_register}
-\alias{get_register}
 \alias{ring_register}
 \alias{set_focus}
 \alias{set_focus_highlighted}
@@ -16,13 +14,9 @@
 set_register(
   x,
   key,
-  override = get_registers_option("override"),
+  clobber = get_registers_option("clobber"),
   envir = parent.frame()
 )
-
-set_static_register(x, key, override = get_registers_option("override"))
-
-get_register(key)
 
 ring_register(key)
 
@@ -106,7 +100,7 @@ registers()
 # and want to check in on it each time you touch it. this is where
 # the focus action comes in. the focus action is a register like any
 # other with one key difference: it's bindable without a popup window.
-set_focus_action(spy(data))
+# set_focus_action(spy(data))
 
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
 # next to Set focus - highlighted, use Alt-Shift-Cmd-F
@@ -135,5 +129,8 @@ cars_sample
 
 
 spy(cars)
+
+# Shift-Cmd-H
+cars
 
 }

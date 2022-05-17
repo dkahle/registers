@@ -57,7 +57,7 @@
 #' # and want to check in on it each time you touch it. this is where
 #' # the focus action comes in. the focus action is a register like any
 #' # other with one key difference: it's bindable without a popup window.
-#' set_focus_action(spy(data))
+#' # set_focus_action(spy(data))
 #'
 #' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
 #' # next to Set focus - highlighted, use Alt-Shift-Cmd-F
@@ -96,13 +96,13 @@
 #' @rdname set_register
 #' @export
 set_register <- function(x, key,
-  override = get_registers_option("override"),
+  clobber = get_registers_option("clobber"),
   envir = parent.frame()
 ) {
 
   if (!is_valid_key(key)) { message("Key `{key}` not valid."); return(invisible()) }
 
-  if (is_registered(key) && isFALSE(override)) {
+  if (is_registered(key) && isFALSE(clobber)) {
     message(glue("Key {key} already registered."))
     return(invisible())
   }
@@ -119,47 +119,25 @@ set_register <- function(x, key,
 
 
 
-
-
-#' @rdname set_register
-#' @export
-set_static_register <- function(x, key, override = get_registers_option("override")) {
-
-  if (!is_valid_key(key)) { message("Key `{key}` not valid."); return(invisible()) }
-
-  if (is_registered(key) && isFALSE(override)) {
-    message(glue("Key {key} already registered."))
-    return(invisible())
-  }
-
-  rset("x" = key, "value" = x)
-
-}
-
-
-
-
-#' @rdname set_register
-#' @export
-get_register <- function(key) {
-
-  stopifnot(is_valid_key(key), length(key) == 1L)
-
-  if (nchar(key) > 1) {
-    if (key %notin% history_symbols) {
-      message("Key should be a single character.", call. = FALSE)
-      return(invisible())
-    }
-    key <- history_symbols_to_key(key)
-  }
-
-  val <- rget(key)
-
-  if (is_dynamic_register(val)) val <- eval(val$name, envir = val$envir)
-
-  val
-
-}
+#
+#
+# #' @rdname set_register
+# #' @export
+# set_static_register <- function(x, key, clobber = get_registers_option("clobber")) {
+#
+#   if (!is_valid_key(key)) { message("Key `{key}` not valid."); return(invisible()) }
+#
+#   if (is_registered(key) && isFALSE(clobber)) {
+#     message(glue("Key {key} already registered."))
+#     return(invisible())
+#   }
+#
+#   rset("x" = key, "value" = x)
+#
+# }
+#
+#
+#
 
 
 
@@ -176,33 +154,62 @@ ring_register <- function(key) {
   }
 
   if (is.null(key)) return(invisible())
-  # if (!rexists(key)) {
-  #   message(glue("Register `{key}` is empty."))
-  #   return(invisible())
-  # }
 
-  if (nchar(key) > 1) {
-    registers <- strsplit(key, "")[[1]]
-    for( reg in registers ) {
-      promise <- rget(reg)
-      if (is.call(promise$name)) {
-        fn <- eval(promise$name[[1]], envir = promise$envir)
-        out <- fn(out)
-      # } else if (bindingIsActive(promise$name, promise$envir)) {
-      #   stop("not yet implemented")
-      } else {
-        val <- eval(promise$name, envir = promise$envir)
-        out <- if (is.function(val)) {
-          val(out)
-        } else {
-          val
-        }
-      }
+  registers <- strsplit(key, "")[[1]]
+  registers <- key_to_history_symbols(registers)
 
+  # return early if no registers exist
+  registers_exist <- vapply(registers, rexists, logical(1))
+  if ( !all(registers_exist) ) {
+    if (sum(!registers_exist) > 1) {
+      cli_alert_danger("Registers {paste0('`', registers[!registers_exist], '`', collapse = ', ')} are empty.")
+    } else {
+      cli_alert_danger("Register `{registers[!registers_exist]}` is empty.")
     }
-  } else {
-    invisible(get_register(key))
+    return(invisible())
   }
+
+
+  # iterate over registers
+  for( reg in registers ) {
+
+    if (reg %in% history_symbols) {
+      out <- rget(reg)
+      next
+    }
+
+    # extract promise
+    promise <- rget(reg)
+
+    # make short-hand references
+    n <- promise$name; e <- promise$envir
+
+    # process promise
+    if (is.call(n)) {
+      if (exists("out")) {
+        fn <- eval(n[[1]], envir = e)
+        out <- fn(out)
+      } else {
+        out <- eval(n, envir = e)
+      }
+    } else if (
+      deparse(n) %in% ls(e, all.names = TRUE) &&
+        bindingIsActive(deparse(n), e)
+    ) {
+      stop("not yet implemented")
+    } else {
+      val <- eval(n, envir =e)
+      out <- if (is.function(val)) {
+        val(out)
+      } else {
+        val
+      }
+    }
+
+  }
+
+  # return
+  invisible(out)
 
 }
 
@@ -216,7 +223,7 @@ set_focus <- function(x) {
 
   eval(
     substitute(
-      set_register(x, "f", override = TRUE, envir = parent.frame(n = 3))
+      set_register(x, "f", clobber = TRUE, envir = parent.frame(n = 3))
     ),
     envir = parent.frame()
   )
@@ -236,7 +243,7 @@ set_focus_highlighted <- function() {
 
   eval(
     substitute(
-      set_register(expr, "f", override = TRUE, envir = parent.frame(n = 3)),
+      set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
       list(expr = as.name(x))
     ),
     envir = parent.frame()
@@ -259,7 +266,7 @@ set_focus_window <- function() {
 
   eval(
     substitute(
-      set_register(expr, "f", override = TRUE, envir = parent.frame(n = 3)),
+      set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
       list(expr = as.name(x))
     ),
     envir = parent.frame()
