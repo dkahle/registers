@@ -8,17 +8,23 @@ Description: Set focus via a windowed prompt
 Binding: set_focus_window
 Interactive: true
 
-Name: Glimpse focus
+Name: Spy focus
 Description: glimpse() focused binding
-Binding: glimpse_focus
+Binding: spy_focus
 Interactive: false
 
-Name: Glimpse highlighted
+Name: Spy highlighted
 Description: glimpse() highlighted binding
-Binding: glimpse_highlighted
+Binding: spy_highlighted
 Interactive: false
 
 Name: Show registers
 Description: Show registers
 Binding: show_registers
+Interactive: false
+
+
+Name: Ring register
+Description: Ring register
+Binding: ring_register
 Interactive: false

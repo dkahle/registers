@@ -15,6 +15,7 @@
 #' set_focus("a")
 #' registers()
 #' show_registers()
+#' register_keys()
 #' ls(registers())
 #'
 #' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
@@ -42,13 +43,17 @@
 #' .
 #' ..
 #' c(._1, ._2, ._3)
-#' f <- function(x, y) {
+#' f <- function(x, y = 1) {
 #'   x + y
 #' }
 #' e <- list2env(list(a = 1, b = 2))
+#' o <- options()
+#' l <- list(1, 2, 3)
 #' df <- cars
 #' registers()
-#'
+#' rm(a, b, c, f, e, o, l, df)
+#' ls()
+#' registers()
 #'
 #'
 #' if (FALSE) { # oddities
@@ -96,6 +101,9 @@ reset_registers <- function() {
 
   options(
     "registers" = list(
+      "options" = list(
+        override = TRUE
+      ),
       "env" = structure(
         new.env(parent = emptyenv()),
         class = "registers"
@@ -110,9 +118,50 @@ reset_registers <- function() {
 
 #' @rdname registers
 #' @export
+set_registers_option <- function(...) {
+
+  new_options <- as.list(match.call())[-1]
+  current_options <- getOption("registers")
+  current_options$options <- current_options$options[
+    names(current_options$options) %notin% names(new_options)
+  ]
+  current_options$options <- c(current_options$options, new_options)
+  options("registers" = current_options)
+
+}
+
+
+
+#' @rdname registers
+#' @export
+get_registers_option <- function(option) {
+
+  getOption("registers")$options[[option]]
+
+}
+
+
+
+
+
+
+
+#' @rdname registers
+#' @export
 print.registers <- function(x, ...) {
   cli_h1("Registers")
   register_names <- ls(registers(), all.names = TRUE)
+
+  # put . next to ..
+  if ("." %in% register_names && ".." %in% register_names) {
+    ndx_.. <- which(".." == register_names)
+    .. <- register_names[ndx_..]
+    register_names <- register_names[-ndx_..]
+    ndx_.  <- which("." == register_names)
+    register_names <- c(register_names[1:ndx_.], .., register_names[(ndx_.+1):length(register_names)])
+  }
+
+  # print
   if (length(register_names) > 0) {
     cli_div(theme = list(
       span.register = list(color = "firebrick"),
@@ -125,7 +174,7 @@ print.registers <- function(x, ...) {
         value <- rget(register)
         cli_alert("{.emph {.register {register}}}: {.value {register_inline_summary(value)}}")
       } else {
-        name <- rget(register)$name
+        name <- deparse(rget(register)$name)
         envir <- rget(register)$envir
         cli_alert("{.emph {.register {register}}}: {.name {name}} {.envir {capture.output(print(envir))}}")
       }
@@ -147,9 +196,48 @@ print.registers <- function(x, ...) {
 
 history_symbols <- c(".", "..", paste0("._", 1:9))
 
-rget <- function(s) get(s, envir = registers())
-rset <- function(s, value) assign(s, value, envir = registers())
-rexists <- function(s) exists(s, envir = registers())
+history_symbols_to_key <- function(x) {
+  c(
+    "." = ".",
+    ".." = ":",
+    "._1" = "1",
+    "._2" = "2",
+    "._3" = "3",
+    "._4" = "4",
+    "._5" = "5",
+    "._6" = "6",
+    "._7" = "7",
+    "._8" = "8",
+    "._9" = "9"
+  )[x]
+}
+
+key_to_history_symbols <- function(x) {
+  c(
+    "." =   ".",
+    ":" =  "..",
+    "1" = "._1",
+    "2" = "._2",
+    "3" = "._3",
+    "4" = "._4",
+    "5" = "._5",
+    "6" = "._6",
+    "7" = "._7",
+    "8" = "._8",
+    "9" = "._9"
+  )[x]
+}
+
+
+
+
+
+
+
+
+rget <- function(x) get(x, envir = registers())
+rset <- function(x, value) assign(x, value, envir = registers())
+rexists <- function(x) exists(x, envir = registers())
 
 
 
@@ -272,166 +360,6 @@ untrack_assignment <- function() {
 
 
 
-
-
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary <- function(x, ...) {
-  UseMethod("register_inline_summary")
-}
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.character <- function(x, ...) {
-  n <- length(x)
-  ez_trunc(
-    if (n == 0L) {
-      "character(0)"
-    } else if (n == 1L) {
-      paste(glue("chr"), paste(x, collapse = ", "))
-    } else {
-      paste(glue("chr[1:{n}]"), paste(x, collapse = ", "))
-    },
-    console_width() - 5L
-  )
-}
-# register_inline_summary(character(0))
-# register_inline_summary("a")
-# register_inline_summary(sample(letters, 100, rep = TRUE))
-# register_inline_summary(sample(c(letters, NA), 100, rep = TRUE))
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.numeric <- function(x, ...) {
-  n <- length(x)
-  ez_trunc(
-    if (n == 0L) {
-      "numeric(0)"
-    } else if (n == 1L) {
-      paste(glue("num"), paste(round(x, digits = 3), collapse = ", "))
-    } else {
-      paste(glue("num[1:{n}]"), paste(round(x, digits = 3), collapse = ", "))
-    },
-    console_width() - 5L
-  )
-}
-# register_inline_summary(numeric(0))
-# register_inline_summary(rnorm(1))
-# register_inline_summary(rnorm(100))
-# register_inline_summary(sample(c(rnorm(4), NA), 100, TRUE))
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.logical <- function(x, ...) {
-  n <- length(x)
-  ez_trunc(
-    if (n == 0L) {
-      "logical(0)"
-    } else if (n == 1L) {
-      paste(glue("logi"), paste(x, collapse = ", "))
-    } else {
-      paste(glue("logi[1:{n}]"), paste(x, collapse = ", "))
-    },
-    console_width() - 5L
-  )
-}
-# register_inline_summary(logical(0))
-# register_inline_summary(TRUE)
-# register_inline_summary(FALSE)
-# register_inline_summary(sample(c(T, F, NA), 100, TRUE))
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.function <- function(x, ...) {
-
-  formal_args_names <- names(formals(x))
-
-  chrs <- ez_trim(text_squeeze(deparse(body(x))))
-  inline <- !(chrs[1] == "{")
-  if (!inline) chrs <- chrs[-c(1, length(chrs))]
-  chrs <- paste(
-    glue("function({paste(formal_args_names, collapse = ',')})"),
-    if (!inline) "{",
-    paste(chrs, collapse = ";  "),
-    if (!inline) "}"
-  )
-  ez_trunc(chrs, console_width() - 5L)
-}
-# f <- function(x) x^2
-# register_inline_summary(f)
-# g <- function(x, y) {
-#   z <- x + y
-#   y^2
-# }
-# register_inline_summary(g)
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.environment <- function(x, ...) {
-
-  ez_trunc(
-    paste(
-      capture.output(print(x)),
-      paste(ls(x), collapse = ", ")
-    ),
-    console_width() - 5L
-  )
-
-}
-# register_inline_summary(new.env())
-# register_inline_summary(environment(registers))
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.tbl_df <- function(x, ...) {
-
-  ez_trunc(
-    glue("tibble [{nrow(x)} \U00D7 {ncol(x)}] {paste(names(x), collapse = ', ')}"),
-    console_width() - 5L
-  )
-
-}
-# register_inline_summary(ggplot2::diamonds)
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.data.frame <- function(x, ...) {
-
-  ez_trunc(
-    glue("data.frame [{nrow(x)} \U00D7 {ncol(x)}] {paste(names(x), collapse = ', ')}"),
-    console_width() - 5L
-  )
-
-}
-# register_inline_summary(cars)
-
-
-
-#' @rdname registers
-#' @export
-register_inline_summary.default <- function(x, ...) {
-
-  if (is.null(x)) return("NULL")
-
-}
-# register_inline_summary(NULL)
 
 
 
