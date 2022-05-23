@@ -2,37 +2,134 @@
 % Please edit documentation in R/set_register.R, R/spy.R
 \name{set_register}
 \alias{set_register}
+\alias{unset_register}
 \alias{ring_register}
-\alias{set_focus}
-\alias{set_focus_highlighted}
-\alias{set_focus_window}
+\alias{ring_register_1}
+\alias{ring_register_2}
+\alias{ring_register_3}
+\alias{ring_register_4}
+\alias{ring_register_5}
+\alias{ring_register_6}
+\alias{ring_register_7}
+\alias{ring_register_8}
+\alias{ring_register_9}
+\alias{ring_register_dot}
+\alias{ring_register_dot_dot}
+\alias{set_register_1_highlighted}
+\alias{set_register_2_highlighted}
+\alias{set_register_3_highlighted}
+\alias{set_register_4_highlighted}
+\alias{set_register_5_highlighted}
+\alias{set_register_6_highlighted}
+\alias{set_register_7_highlighted}
+\alias{set_register_8_highlighted}
+\alias{set_register_9_highlighted}
+\alias{ring_register_1_on_highlighted}
+\alias{ring_register_2_on_highlighted}
+\alias{ring_register_3_on_highlighted}
+\alias{ring_register_4_on_highlighted}
+\alias{ring_register_5_on_highlighted}
+\alias{ring_register_6_on_highlighted}
+\alias{ring_register_7_on_highlighted}
+\alias{ring_register_8_on_highlighted}
+\alias{ring_register_9_on_highlighted}
+\alias{ring_register_dot_on_highlighted}
+\alias{ring_register_dot_dot_on_highlighted}
 \alias{spy}
-\alias{spy_focus}
 \alias{spy_highlighted}
 \title{Registers}
 \usage{
+unset_register(key)
+
 set_register(
   x,
   key,
   clobber = get_registers_option("clobber"),
-  envir = parent.frame()
+  envir = parent.frame(),
+  reserved_key_bypass = FALSE
 )
 
 ring_register(key)
 
-set_focus(x)
+ring_register_1()
 
-set_focus_highlighted()
+ring_register_2()
 
-set_focus_window()
+ring_register_3()
+
+ring_register_4()
+
+ring_register_5()
+
+ring_register_6()
+
+ring_register_7()
+
+ring_register_8()
+
+ring_register_9()
+
+ring_register_dot()
+
+ring_register_dot_dot()
+
+set_register_1_highlighted()
+
+set_register_2_highlighted()
+
+set_register_3_highlighted()
+
+set_register_4_highlighted()
+
+set_register_5_highlighted()
+
+set_register_6_highlighted()
+
+set_register_7_highlighted()
+
+set_register_8_highlighted()
+
+set_register_9_highlighted()
+
+ring_register_1_on_highlighted()
+
+ring_register_2_on_highlighted()
+
+ring_register_3_on_highlighted()
+
+ring_register_4_on_highlighted()
+
+ring_register_5_on_highlighted()
+
+ring_register_6_on_highlighted()
+
+ring_register_7_on_highlighted()
+
+ring_register_8_on_highlighted()
+
+ring_register_9_on_highlighted()
+
+ring_register_dot_on_highlighted()
+
+ring_register_dot_dot_on_highlighted()
 
 spy(data, name = deparse(substitute(data)))
-
-spy_focus()
 
 spy_highlighted()
 }
 \arguments{
+\item{key}{Register name, a character}
+
+\item{x}{Expression to store in register}
+
+\item{clobber}{Should the current value of the register be overwritten?
+Defaults to \code{get_registers_option("clobber")}, which defaults to \code{TRUEi}.}
+
+\item{envir}{Environment in which to evaluate the expression, defaults to
+\code{parent.frame()}.}
+
+\item{reserved_key_bypass}{Used internally to override setting invalid keys.}
+
 \item{data}{A dataset (or expression that returns one)}
 
 \item{name}{The binding name to focus on, as a string}
@@ -53,7 +150,7 @@ In Vim-speak, \code{focus} is the unnamed register.
 \examples{
 
 # registers has a built in generic (function) called spy() that
-# helps summarize objects succintly. it's a lot like dplyr::glimpse()
+# helps summarize objects succinctly. it's a lot like dplyr::glimpse()
 spy(cars)
 
 
@@ -78,45 +175,85 @@ ring_register("f")
 # to Cmd-R and click Apply. now push Cmd-R, type "f", and enter.
 
 
+# unset_register() clears registers
+unset_register("f")
+registers()
+
+
 # with this you can compose registers
 set_register(cars, "d")
 set_register(spy(), "g")
 registers()
 ring_register("dg")
-print_head <- function(.) print(tibble::as_tibble(.))
-set_register(print_head(), "h")
-ring_register("dh")
+ring_register("dg 3")
 
 
-# registers are functions desirable for their side effects, their
-# values are invisibly returned to nowhere
+# registers are R code you want to make hotkeyable.
+# the code is mainly of interested for its side effects:
+# the output will only be printed if there's an explicit call to something
+# that prints to the screen, like print() or spy()
+# values are invisibly returned to nowhere, and thus unbindable*
 
-# "f" is the focus register. you can assign to the focus register
-# more quickly with
-set_focus(spy(airquality))
+
+# registers 1-9 are hotkeyable via RStudio's addin feature.
+# you can set them in either of two ways.
+# way 1:
+set_register(spy(mtcars), "1")
 registers()
+ring_register("1")
+# way 2 is to map set_register_1() to a hotkey.
+# i recommend setting Store highlighted to register 1 to Alt-Cmd-1
+# then highlight the next line and press the hotkey
+spy(mtcars)
 
-# it's commonly the case that you're manipulating a single dataset
-# and want to check in on it each time you touch it. this is where
-# the focus action comes in. the focus action is a register like any
-# other with one key difference: it's bindable without a popup window.
-# set_focus_action(spy(data))
 
-# in RStudio, go to Tools > Modify Keyboard Shortcuts...
-# next to Set focus - highlighted, use Alt-Shift-Cmd-F
-# next to Set focus - window, use Alt-F
-# next to Glimpse focus, use Shift-Cmd-G
+# like storing code into numbered registers,
+# ringing numbered registers is hotkeyable, too
+# these are hotkeyed as Ring register 1 (2, 3, ...)
+# i recommend setting these to Cmd-1, Cmd-2, and so on
+# try ringing the register 1 you set above.
 
-# press Shift-Cmd-G
 
-airquality
-# highlight airquality above and push Alt-Shift-Cmd-F
-# press Shift-Cmd-G
 
-# in Tools > Modify Keyboard Shortcuts...,
-# set Glimpse highlighted to Alt-Shift-H, then highlight the line below and
-# press Shift-Cmd-H
-subset(cars, speed > 10)
+# sometimes you have code in a register that you want to operate as an
+# action, like the spy() and cars example above. spy() is code that
+# is an action you want to run against cars. we're still thinking about
+# the cleanest way to implement this, but for the time being you can
+# just store each piece to a register, and then set ring_register() to
+# a numbered action for example:
+reset_registers()
+set_register(cars, "d")
+set_register(spy(), "g")
+set_register(ring_register("dg"), "1")
+ring_register("1")
+
+
+
+# one common workflow is to want to run a registers action on a highlighted
+# object. currently, to do this you'd need to save the highlighted code
+# to a register, bind a composite ring_register() to a register, and then
+# ring that register. that requires typing, but the whole point is to move
+# away from typing.
+# to get around this, have the ring_register_#_on_highlighted() functions
+# that can be hotkeyed. i recommend setting Ring register 1 on highlighted
+# to Shift-Cmd-1 and so on.
+# (note: on a mac, you can change built-in OS bindings in System Preferences
+#        > Keyboard > Shortcuts)
+set_register(spy(), "1")
+
+print_lm <- function(df) print(summary(lm(dist ~ speed, data = df)))
+set_register(print_lm(), "2")
+
+plot_sample <- function(df) with(df[sample(nrow(df),5),], plot(speed, dist))
+set_register(plot_sample(), "3")
+
+cars # highlight this and Shift-Cmd-1, Shift-Cmd-2, Shift-Cmd-3
+
+# the highlighted text is stored to the 0 register
+ring_register("01")
+
+# note: with ggplot2 graphics, you'll need to wrap the graphic in print()
+# since ggplot() returns an object that renders when printed
 
 
 # interesting use case: generate a random subsample (that has a desired property)

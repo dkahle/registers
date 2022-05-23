@@ -4,13 +4,19 @@
 #'
 #' In Vim-speak, `focus` is the unnamed register.
 #'
-#' @param name The binding name to focus on, as a string
+#' @param x Expression to store in register
+#' @param key Register name, a character
+#' @param clobber Should the current value of the register be overwritten?
+#'   Defaults to `get_registers_option("clobber")`, which defaults to `TRUEi`.
+#' @param envir Environment in which to evaluate the expression, defaults to
+#'   `parent.frame()`.
+#' @param reserved_key_bypass Used internally to override setting invalid keys.
 #' @return Invisible \code{NULL}
 #' @name set_register
 #' @examples
 #'
 #' # registers has a built in generic (function) called spy() that
-#' # helps summarize objects succintly. it's a lot like dplyr::glimpse()
+#' # helps summarize objects succinctly. it's a lot like dplyr::glimpse()
 #' spy(cars)
 #'
 #'
@@ -35,45 +41,85 @@
 #' # to Cmd-R and click Apply. now push Cmd-R, type "f", and enter.
 #'
 #'
+#' # unset_register() clears registers
+#' unset_register("f")
+#' registers()
+#'
+#'
 #' # with this you can compose registers
 #' set_register(cars, "d")
 #' set_register(spy(), "g")
 #' registers()
 #' ring_register("dg")
-#' print_head <- function(.) print(tibble::as_tibble(.))
-#' set_register(print_head(), "h")
-#' ring_register("dh")
+#' ring_register("dg 3")
 #'
 #'
-#' # registers are functions desirable for their side effects, their
-#' # values are invisibly returned to nowhere
+#' # registers are R code you want to make hotkeyable.
+#' # the code is mainly of interested for its side effects:
+#' # the output will only be printed if there's an explicit call to something
+#' # that prints to the screen, like print() or spy()
+#' # values are invisibly returned to nowhere, and thus unbindable*
 #'
-#' # "f" is the focus register. you can assign to the focus register
-#' # more quickly with
-#' set_focus(spy(airquality))
+#'
+#' # registers 1-9 are hotkeyable via RStudio's addin feature.
+#' # you can set them in either of two ways.
+#' # way 1:
+#' set_register(spy(mtcars), "1")
 #' registers()
+#' ring_register("1")
+#' # way 2 is to map set_register_1() to a hotkey.
+#' # i recommend setting Store highlighted to register 1 to Alt-Cmd-1
+#' # then highlight the next line and press the hotkey
+#' spy(mtcars)
 #'
-#' # it's commonly the case that you're manipulating a single dataset
-#' # and want to check in on it each time you touch it. this is where
-#' # the focus action comes in. the focus action is a register like any
-#' # other with one key difference: it's bindable without a popup window.
-#' # set_focus_action(spy(data))
 #'
-#' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
-#' # next to Set focus - highlighted, use Alt-Shift-Cmd-F
-#' # next to Set focus - window, use Alt-F
-#' # next to Glimpse focus, use Shift-Cmd-G
+#' # like storing code into numbered registers,
+#' # ringing numbered registers is hotkeyable, too
+#' # these are hotkeyed as Ring register 1 (2, 3, ...)
+#' # i recommend setting these to Cmd-1, Cmd-2, and so on
+#' # try ringing the register 1 you set above.
 #'
-#' # press Shift-Cmd-G
 #'
-#' airquality
-#' # highlight airquality above and push Alt-Shift-Cmd-F
-#' # press Shift-Cmd-G
 #'
-#' # in Tools > Modify Keyboard Shortcuts...,
-#' # set Glimpse highlighted to Alt-Shift-H, then highlight the line below and
-#' # press Shift-Cmd-H
-#' subset(cars, speed > 10)
+#' # sometimes you have code in a register that you want to operate as an
+#' # action, like the spy() and cars example above. spy() is code that
+#' # is an action you want to run against cars. we're still thinking about
+#' # the cleanest way to implement this, but for the time being you can
+#' # just store each piece to a register, and then set ring_register() to
+#' # a numbered action for example:
+#' reset_registers()
+#' set_register(cars, "d")
+#' set_register(spy(), "g")
+#' set_register(ring_register("dg"), "1")
+#' ring_register("1")
+#'
+#'
+#'
+#' # one common workflow is to want to run a registers action on a highlighted
+#' # object. currently, to do this you'd need to save the highlighted code
+#' # to a register, bind a composite ring_register() to a register, and then
+#' # ring that register. that requires typing, but the whole point is to move
+#' # away from typing.
+#' # to get around this, have the ring_register_#_on_highlighted() functions
+#' # that can be hotkeyed. i recommend setting Ring register 1 on highlighted
+#' # to Shift-Cmd-1 and so on.
+#' # (note: on a mac, you can change built-in OS bindings in System Preferences
+#' #        > Keyboard > Shortcuts)
+#' set_register(spy(), "1")
+#'
+#' print_lm <- function(df) print(summary(lm(dist ~ speed, data = df)))
+#' set_register(print_lm(), "2")
+#'
+#' plot_sample <- function(df) with(df[sample(nrow(df),5),], plot(speed, dist))
+#' set_register(plot_sample(), "3")
+#'
+#' cars # highlight this and Shift-Cmd-1, Shift-Cmd-2, Shift-Cmd-3
+#'
+#' # the highlighted text is stored to the 0 register
+#' ring_register("01")
+#'
+#' # note: with ggplot2 graphics, you'll need to wrap the graphic in print()
+#' # since ggplot() returns an object that renders when printed
 #'
 #'
 #' # interesting use case: generate a random subsample (that has a desired property)
@@ -88,6 +134,22 @@
 
 
 
+#' @rdname set_register
+#' @export
+unset_register <- function(key) {
+
+  if (length(key) > 1) vapply(key, unset_register, logical(1))
+
+  if (!is_valid_key(key)) { message(glue("Key `{key}` not valid.")); return(invisible(FALSE)) }
+
+  if (!rexists(key)) { message(glue("Key `{key}` is not registered.")); return(invisible(FALSE)) }
+
+  if (is_reserved_key(key)) { message(glue("Key `{key}` is reserved.")); return(invisible(FALSE)) }
+
+  rm(list = key, envir = registers())
+
+}
+
 
 
 
@@ -95,14 +157,21 @@
 
 #' @rdname set_register
 #' @export
-set_register <- function(x, key,
+set_register <- function(
+  x,
+  key,
   clobber = get_registers_option("clobber"),
-  envir = parent.frame()
+  envir = parent.frame(),
+  reserved_key_bypass = FALSE
 ) {
 
-  if (!is_valid_key(key)) { message("Key `{key}` not valid."); return(invisible()) }
+  if (length(key) > 1)  { message("`set_register()` only accepts a single key."); return(invisible()) }
 
-  if (is_registered(key) && isFALSE(clobber)) {
+  if (reserved_key_bypass && !is_valid_key(key)) { message(glue("Key `{key}` not valid.")); return(invisible()) }
+
+  if (reserved_key_bypass && is_reserved_key(key)) { message(glue("Key `{key}` is reserved.")); return(invisible()) }
+
+  if (reserved_key_bypass && is_registered(key) && isFALSE(clobber)) {
     message(glue("Key {key} already registered."))
     return(invisible())
   }
@@ -156,6 +225,17 @@ ring_register <- function(key) {
   if (is.null(key)) return(invisible())
 
   registers <- strsplit(key, "")[[1]]
+
+  if (any(registers == " ")) {
+    if (sum(registers == " ") > 1) cli_alert_danger("Invalid register composition.")
+    break_ndx <- which(registers == " ")
+    n_reg <- length(registers)
+    key <- paste(registers[1:(break_ndx-1)], collapse = "")
+    times <- as.integer(paste(registers[(break_ndx+1):n_reg], collapse = ""))
+    for (k in 1:times) ring_register(key)
+    return(invisible())
+  }
+
   registers <- key_to_history_symbols(registers)
 
   # return early if no registers exist
@@ -215,67 +295,365 @@ ring_register <- function(key) {
 
 
 
+#
+#
+# #' @rdname set_register
+# #' @export
+# set_focus <- function(x) {
+#
+#   eval(
+#     substitute(
+#       registers::set_register(x, "f", clobber = get_registers_option("clobber"), envir = parent.frame(n = 3))
+#     ),
+#     envir = parent.frame()
+#   )
+#
+# }
+#
+#
+#
+# #' @rdname set_register
+# #' @export
+# set_focus_highlighted <- function() {
+#
+#   context <- rstudioapi::getActiveDocumentContext()
+#   x <- context$selection[[1]]$text
+#
+#   cli_alert_success("Focusing on `{x}`...")
+#
+#   eval(
+#     substitute(
+#       registers::set_register(expr, "f", clobber = get_registers_option("clobber"), envir = parent.frame(n = 3)),
+#       list(expr = as.name(x))
+#     ),
+#     envir = parent.frame()
+#   )
+#
+# }
+#
+#
+#
+# #' @rdname set_register
+# #' @export
+# set_focus_window <- function() {
+#
+#   x <- rstudioapi::showPrompt(
+#     title = "Set focus",
+#     message = "Name of the R object to focus on?"
+#   )
+#
+#   cli_alert_success("Focusing on `{x}`...")
+#
+#   eval(
+#     substitute(
+#       registers::set_register(expr, "f", clobber = get_registers_option("clobber"), envir = parent.frame(n = 3)),
+#       list(expr = as.name(x))
+#     ),
+#     envir = parent.frame()
+#   )
+#
+# }
+#
+#
+#
 
 
-#' @rdname set_register
-#' @export
-set_focus <- function(x) {
 
-  eval(
-    substitute(
-      registers::set_register(x, "f", clobber = TRUE, envir = parent.frame(n = 3))
-    ),
-    envir = parent.frame()
-  )
+
+
+
+#
+# set_number_register <- function(key) {
+#
+#   function(x) {
+#
+#     if (is.expression(key)) key <- deparse(key)
+#     if (is.numeric(key)) key <- as.character(key)
+#
+#     eval(
+#       substitute(
+#         registers::set_register(
+#           x,
+#           key,
+#           clobber = get_registers_option("clobber"),
+#           envir = parent.frame(n = 3)
+#         ),
+#         list(
+#           x = substitute(x),
+#           key = key
+#         )
+#       ),
+#       envir = parent.frame()
+#     )
+#
+#     x_formatted <- ez_trunc(ez_distill(deparse(substitute(x))), console_width() - 22L)
+#     cli_alert_success(glue("Register {key} set to `{x_formatted}`"))
+#
+#   }
+#
+# }
+#
+#
+# #' @rdname set_register
+# #' @export
+# set_register_1 <- set_number_register("1")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_2 <- set_number_register("2")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_3 <- set_number_register("3")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_4 <- set_number_register("4")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_5 <- set_number_register("5")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_6 <- set_number_register("6")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_7 <- set_number_register("7")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_8 <- set_number_register("8")
+#
+# #' @rdname set_register
+# #' @export
+# set_register_9 <- set_number_register("9")
+#
+
+
+
+
+
+
+
+
+
+# ring_numbered_register() is needed for hotkeying ringing numbered registers
+ring_numbered_register <- function(key) {
+
+  function() {
+
+    if (is.expression(key)) key <- deparse(key)
+    if (is.numeric(key)) key <- as.character(key)
+
+    if (!rexists(key)) {
+      cli_alert_danger(glue("Register {key} has key been set.")) # if stop(), addin makes window
+      return(invisible(NULL))
+    }
+
+    f <- rget(key)
+
+    # message(glue("Evaluating {capture.output(print(f$name))} in {capture.output(print(f$envir))}"))
+    data <- eval(f$name, envir = f$envir)
+
+    return(invisible(data))
+
+  }
 
 }
 
 
+#' @rdname set_register
+#' @export
+ring_register_1 <- ring_numbered_register("1")
 
 #' @rdname set_register
 #' @export
-set_focus_highlighted <- function() {
+ring_register_2 <- ring_numbered_register("2")
 
-  context <- rstudioapi::getActiveDocumentContext()
-  x <- context$selection[[1]]$text
+#' @rdname set_register
+#' @export
+ring_register_3 <- ring_numbered_register("3")
 
-  cli_alert_success("Focusing on `{x}`...")
+#' @rdname set_register
+#' @export
+ring_register_4 <- ring_numbered_register("4")
 
-  eval(
-    substitute(
-      registers::set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
-      list(expr = as.name(x))
-    ),
-    envir = parent.frame()
-  )
+#' @rdname set_register
+#' @export
+ring_register_5 <- ring_numbered_register("5")
+
+#' @rdname set_register
+#' @export
+ring_register_6 <- ring_numbered_register("6")
+
+#' @rdname set_register
+#' @export
+ring_register_7 <- ring_numbered_register("7")
+
+#' @rdname set_register
+#' @export
+ring_register_8 <- ring_numbered_register("8")
+
+#' @rdname set_register
+#' @export
+ring_register_9 <- ring_numbered_register("9")
+
+#' @rdname set_register
+#' @export
+ring_register_dot <- ring_numbered_register(".")
+
+#' @rdname set_register
+#' @export
+ring_register_dot_dot <- ring_numbered_register(":")
+
+
+
+
+
+
+
+
+
+set_register_highlighted <- function(key, message = TRUE) {
+
+  function() {
+
+    if (is.expression(key)) key <- deparse(key)
+    if (is.numeric(key)) key <- as.character(key)
+
+    context <- rstudioapi::getActiveDocumentContext()
+    x <- context$selection[[1]]$text
+    if (x == "") {
+      cli_alert_danger("No text highlighted.")
+      return(invisible())
+    }
+
+    eval(
+      substitute(
+        registers::set_register(
+          expr,
+          key,
+          clobber = get_registers_option("clobber"),
+          envir = parent.frame(n = 3)
+        ),
+        list(
+          expr = parse(text = x)[[1]],
+          key = key
+        )
+      )
+      ,
+      envir = parent.frame()
+    )
+
+    x_formatted <- ez_trunc(ez_distill(x), console_width() - 22L)
+    if (message) cli_alert_success(glue("Register {key} set to `{x_formatted}`"))
+
+    invisible(x)
+
+  }
 
 }
 
+#' @rdname set_register
+#' @export
+set_register_1_highlighted <- set_register_highlighted("1")
+
+#' @rdname set_register
+#' @export
+set_register_2_highlighted <- set_register_highlighted("2")
+
+#' @rdname set_register
+#' @export
+set_register_3_highlighted <- set_register_highlighted("3")
+
+#' @rdname set_register
+#' @export
+set_register_4_highlighted <- set_register_highlighted("4")
+
+#' @rdname set_register
+#' @export
+set_register_5_highlighted <- set_register_highlighted("5")
+
+#' @rdname set_register
+#' @export
+set_register_6_highlighted <- set_register_highlighted("6")
+
+#' @rdname set_register
+#' @export
+set_register_7_highlighted <- set_register_highlighted("7")
+
+#' @rdname set_register
+#' @export
+set_register_8_highlighted <- set_register_highlighted("8")
+
+#' @rdname set_register
+#' @export
+set_register_9_highlighted <- set_register_highlighted("9")
+
+
+
+
+
+
+
+ring_register_on_highlighted <- function(key, ...) {
+
+  function() {
+
+    # save highlighted to register 0
+    set_register_highlighted("0", message = FALSE)()
+
+    # ring register on highlighted
+    ring_register(paste0("0", key))
+
+  }
+
+}
+
+#' @rdname set_register
+#' @export
+ring_register_1_on_highlighted <- ring_register_on_highlighted("1")
+
+#' @rdname set_register
+#' @export
+ring_register_2_on_highlighted <- ring_register_on_highlighted("2")
+
+#' @rdname set_register
+#' @export
+ring_register_3_on_highlighted <- ring_register_on_highlighted("3")
+
+#' @rdname set_register
+#' @export
+ring_register_4_on_highlighted <- ring_register_on_highlighted("4")
+
+#' @rdname set_register
+#' @export
+ring_register_5_on_highlighted <- ring_register_on_highlighted("5")
+
+#' @rdname set_register
+#' @export
+ring_register_6_on_highlighted <- ring_register_on_highlighted("6")
+
+#' @rdname set_register
+#' @export
+ring_register_7_on_highlighted <- ring_register_on_highlighted("7")
+
+#' @rdname set_register
+#' @export
+ring_register_8_on_highlighted <- ring_register_on_highlighted("8")
+
+#' @rdname set_register
+#' @export
+ring_register_9_on_highlighted <- ring_register_on_highlighted("9")
 
 
 #' @rdname set_register
 #' @export
-set_focus_window <- function() {
+ring_register_dot_on_highlighted <- ring_register_on_highlighted(".")
 
-  x <- rstudioapi::showPrompt(
-    title = "Set focus",
-    message = "Name of the R object to focus on?"
-  )
-
-  cli_alert_success("Focusing on `{x}`...")
-
-  eval(
-    substitute(
-      registers::set_register(expr, "f", clobber = TRUE, envir = parent.frame(n = 3)),
-      list(expr = as.name(x))
-    ),
-    envir = parent.frame()
-  )
-
-}
-
-
-
-
-
+#' @rdname set_register
+#' @export
+ring_register_dot_dot_on_highlighted <- ring_register_on_highlighted(":")
 

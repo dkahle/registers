@@ -1,6 +1,6 @@
 
 
-ez_trunc <- function(string, width, ellipsis = "...") {
+ez_trunc <- function(string, width, ellipsis = "\u2026") {
   too_long <- !is.na(string) & nchar(string) > width
   width... <- width - nchar(ellipsis)
   string[too_long] <- paste0(substr(string[too_long], 1, width...), ellipsis)
@@ -26,15 +26,33 @@ ez_trim <- function(string) {
 
 
 
-is_valid_key <- function(x) {
-  if (length(x) > 1) return(unname(vapply(x, is_valid_key, logical(1))))
-  is.character(x) && nchar(x) == 1L
+is_valid_key <- function(key) {
+  if (length(key) > 1) return(unname(vapply(key, is_valid_key, logical(1))))
+  is.character(key) && nchar(key) == 1L
 }
 # is_valid_key("h")
 # is_valid_key("!")
 # is_valid_key(c("h", "i"))
 # is_valid_key(c("h", "i"))
 # is_valid_key(c("h", "ii", 5)) # note coercion
+
+
+
+reserved_keys <- c(" ", as.character(0:9))
+
+is_reserved_key <- function(key) {
+
+  if (!all(is_valid_key(key))) { message("Invalid key specified."); return(invisible()) }
+  key %in% reserved_keys
+
+}
+
+# is_reserved_key(c("h", "i", " "))
+# is_reserved_key(c("h", "!"))
+# is_reserved_key(c("h", "ii", 5)) # note coercion
+
+
+
 
 
 is_registered <- function(key) {

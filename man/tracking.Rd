@@ -10,7 +10,7 @@
 \alias{resume_tracking}
 \title{Track assignment}
 \format{
-An object of class \code{character} of length 11.
+An object of class \code{character} of length 2.
 }
 \usage{
 history_symbols
@@ -48,8 +48,6 @@ registers()
 c <- "third"
 .
 ..
-c(._1, ._2, ._3)
-ls()
 
 
 # composing with history registers
@@ -58,10 +56,9 @@ set_register(spy(), "s")
 a <- "first"
 b <- "second"
 c <- "third"
-c(., .., ._3)
+c(., ..)
 ring_register(".s")
 ring_register(":s")
-ring_register("3s")
 
 
 if (FALSE) { # oddities

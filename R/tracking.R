@@ -21,8 +21,6 @@
 #' c <- "third"
 #' .
 #' ..
-#' c(._1, ._2, ._3)
-#' ls()
 #'
 #'
 #' # composing with history registers
@@ -31,10 +29,9 @@
 #' a <- "first"
 #' b <- "second"
 #' c <- "third"
-#' c(., .., ._3)
+#' c(., ..)
 #' ring_register(".s")
 #' ring_register(":s")
-#' ring_register("3s")
 #'
 #'
 #' if (FALSE) { # oddities
@@ -56,21 +53,22 @@
 
 
 
-history_symbols <- c(".", "..", paste0("._", 1:9))
+# history_symbols <- c(".", "..", paste0("._", 1:9))
+history_symbols <- c(".", "..")
 
 history_symbols_to_key <- function(x) {
   x[x %in% history_symbols] <- c(
     "." = ".",
-    ".." = ":",
-    "._1" = "1",
-    "._2" = "2",
-    "._3" = "3",
-    "._4" = "4",
-    "._5" = "5",
-    "._6" = "6",
-    "._7" = "7",
-    "._8" = "8",
-    "._9" = "9"
+    ".." = ":"#,
+    # "._1" = "1",
+    # "._2" = "2",
+    # "._3" = "3",
+    # "._4" = "4",
+    # "._5" = "5",
+    # "._6" = "6",
+    # "._7" = "7",
+    # "._8" = "8",
+    # "._9" = "9"
   )[x[x %in% history_symbols]]
   x
 }
@@ -84,16 +82,16 @@ history_reg_symbols <- history_symbols_to_key(history_symbols)
 key_to_history_symbols <- function(x) {
   x[x %in% history_reg_symbols] <- c(
     "." =   ".",
-    ":" =  "..",
-    "1" = "._1",
-    "2" = "._2",
-    "3" = "._3",
-    "4" = "._4",
-    "5" = "._5",
-    "6" = "._6",
-    "7" = "._7",
-    "8" = "._8",
-    "9" = "._9"
+    ":" =  ".."#,
+    # "1" = "._1",
+    # "2" = "._2",
+    # "3" = "._3",
+    # "4" = "._4",
+    # "5" = "._5",
+    # "6" = "._6",
+    # "7" = "._7",
+    # "8" = "._8",
+    # "9" = "._9"
   )[x[x %in% history_reg_symbols]]
   x
 }
@@ -122,17 +120,17 @@ make_active_history_binding <- function(string) {
 }
 
 
-assignment_waterfall <- function() {
-  rset("._9", rget("._8"))
-  rset("._8", rget("._7"))
-  rset("._7", rget("._6"))
-  rset("._6", rget("._5"))
-  rset("._5", rget("._4"))
-  rset("._4", rget("._3"))
-  rset("._3", rget("._2"))
-  rset("._2", rget( ".."))
-  rset("._1", rget(  "."))
-}
+# assignment_waterfall <- function() {
+#   rset("._9", rget("._8"))
+#   rset("._8", rget("._7"))
+#   rset("._7", rget("._6"))
+#   rset("._6", rget("._5"))
+#   rset("._5", rget("._4"))
+#   rset("._4", rget("._3"))
+#   rset("._3", rget("._2"))
+#   rset("._2", rget( ".."))
+#   rset("._1", rget(  "."))
+# }
 
 
 
@@ -160,7 +158,7 @@ track_assignment <- function(symb = c("<-", "<+")) {
 
       rset("..", rget("."))
       rset(".", value)
-      assignment_waterfall()
+      # assignment_waterfall()
 
       assign(deparse(name), value, envir = parent.frame())
     }
@@ -185,7 +183,7 @@ track_assignment <- function(symb = c("<-", "<+")) {
 
       rset("..", rget("."))
       rset(".", value)
-      assignment_waterfall()
+      # assignment_waterfall()
 
       assign(deparse(name), value, envir = parent.frame())
 
@@ -231,7 +229,8 @@ untrack_assignment <- function() {
 #' @export
 pause_tracking <- function() {
 
-
+  cli_alert_info("Reverting to regular `<-`")
+  rm(list = "<-", envir = .GlobalEnv)
 
 }
 
@@ -243,7 +242,21 @@ pause_tracking <- function() {
 #' @export
 resume_tracking <- function() {
 
+  cli_alert_info("Tracking `<-` loaded to workspace")
 
+  new_assignment <- function(lhs, rhs) {
+
+    assign("name", substitute(lhs))
+    assign("value", eval(substitute(rhs), envir = parent.frame()))
+
+    rset("..", rget("."))
+    rset(".", value)
+    # assignment_waterfall()
+
+    assign(deparse(name), value, envir = parent.frame())
+  }
+
+  assign("<-", new_assignment, envir = .GlobalEnv)
 
 }
 

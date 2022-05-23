@@ -35,7 +35,7 @@ spy <- function(data, name = deparse(substitute(data))) {
     msg <- capture.output(dplyr::glimpse( dplyr::collect(data) ))
   }
 
-  print(boxx(msg, header = title, padding = 0))
+  print(boxx(msg, header = title, padding = 0, border_style = "round"))
   invisible(data)
 
 }
@@ -44,24 +44,24 @@ spy <- function(data, name = deparse(substitute(data))) {
 
 
 
-
-
-#' @rdname set_register
-#' @export
-spy_focus <- function() {
-
-  if (!rexists("f")) {
-    cli_alert_danger("No focus has been set.") # if stop(), addin makes window
-    return(invisible(NULL))
-  }
-
-  f <- rget("f")
-  data <- eval(f$name, envir = f$envir)
-
-  spy(data, deparse(f$name))
-
-}
-
+#
+#
+# #' @rdname set_register
+# #' @export
+# spy_focus <- function() {
+#
+#   if (!rexists("f")) {
+#     cli_alert_danger("No focus has been set.") # if stop(), addin makes window
+#     return(invisible(NULL))
+#   }
+#
+#   f <- rget("f")
+#   data <- eval(f$name, envir = f$envir)
+#
+#   spy(data, deparse(f$name))
+#
+# }
+#
 
 
 

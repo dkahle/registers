@@ -11,8 +11,7 @@
 #' @examples
 #'
 #' registers()
-#' a <- 1
-#' set_focus("a")
+#' set_register(a <- rnorm(1), "a")
 #' registers()
 #' show_registers()
 #' ls(registers())

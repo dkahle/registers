@@ -1,18 +1,3 @@
-Name: Set focus - highlighted
-Description: Set focus on highlighted binding
-Binding: set_focus_highlighted
-Interactive: false
-
-Name: Set focus - window
-Description: Set focus via a windowed prompt
-Binding: set_focus_window
-Interactive: true
-
-Name: Spy focus
-Description: glimpse() focused binding
-Binding: spy_focus
-Interactive: false
-
 Name: Spy highlighted
 Description: glimpse() highlighted binding
 Binding: spy_highlighted
@@ -28,3 +13,145 @@ Name: Ring register
 Description: Ring register
 Binding: ring_register
 Interactive: false
+
+Name: Ring register 1
+Description: Ring register 1
+Binding: ring_register_1
+Interactive: false
+
+Name: Ring register 2
+Description: Ring register 2
+Binding: ring_register_2
+Interactive: false
+
+Name: Ring register 3
+Description: Ring register 3
+Binding: ring_register_3
+Interactive: false
+
+Name: Ring register 4
+Description: Ring register 4
+Binding: ring_register_4
+Interactive: false
+
+Name: Ring register 5
+Description: Ring register 5
+Binding: ring_register_5
+Interactive: false
+
+Name: Ring register 6
+Description: Ring register 6
+Binding: ring_register_6
+Interactive: false
+
+Name: Ring register 7
+Description: Ring register 7
+Binding: ring_register_7
+Interactive: false
+
+Name: Ring register 8
+Description: Ring register 8
+Binding: ring_register_8
+Interactive: false
+
+Name: Ring register 9
+Description: Ring register 9
+Binding: ring_register_9
+Interactive: false
+
+
+
+Name: Store highlighted to register 1
+Description: Store highlighted to register 1
+Binding: set_register_1_highlighted
+Interactive: false
+
+Name: Store highlighted to register 2
+Description: Store highlighted to register 2
+Binding: set_register_2_highlighted
+Interactive: false
+
+Name: Store highlighted to register 3
+Description: Store highlighted to register 3
+Binding: set_register_3_highlighted
+Interactive: false
+
+Name: Store highlighted to register 4
+Description: Store highlighted to register 4
+Binding: set_register_4_highlighted
+Interactive: false
+
+Name: Store highlighted to register 5
+Description: Store highlighted to register 5
+Binding: set_register_5_highlighted
+Interactive: false
+
+Name: Store highlighted to register 6
+Description: Store highlighted to register 6
+Binding: set_register_6_highlighted
+Interactive: false
+
+Name: Store highlighted to register 7
+Description: Store highlighted to register 7
+Binding: set_register_7_highlighted
+Interactive: false
+
+Name: Store highlighted to register 8
+Description: Store highlighted to register 8
+Binding: set_register_8_highlighted
+Interactive: false
+
+Name: Store highlighted to register 9
+Description: Store highlighted to register 9
+Binding: set_register_9_highlighted
+Interactive: false
+
+
+
+Name: Ring register 1 on highlighted
+Description: Ring register 1 on highlighted
+Binding: ring_register_1_on_highlighted
+Interactive: false
+
+Name: Ring register 2 on highlighted
+Description: Ring register 2 on highlighted
+Binding: ring_register_2_on_highlighted
+Interactive: false
+
+Name: Ring register 3 on highlighted
+Description: Ring register 3 on highlighted
+Binding: ring_register_3_on_highlighted
+Interactive: false
+
+Name: Ring register 4 on highlighted
+Description: Ring register 4 on highlighted
+Binding: ring_register_4_on_highlighted
+Interactive: false
+
+Name: Ring register 5 on highlighted
+Description: Ring register 5 on highlighted
+Binding: ring_register_5_on_highlighted
+Interactive: false
+
+Name: Ring register 6 on highlighted
+Description: Ring register 6 on highlighted
+Binding: ring_register_6_on_highlighted
+Interactive: false
+
+Name: Ring register 7 on highlighted
+Description: Ring register 7 on highlighted
+Binding: ring_register_7_on_highlighted
+Interactive: false
+
+Name: Ring register 8 on highlighted
+Description: Ring register 8 on highlighted
+Binding: ring_register_8_on_highlighted
+Interactive: false
+
+Name: Ring register 9 on highlighted
+Description: Ring register 9 on highlighted
+Binding: ring_register_9_on_highlighted
+Interactive: false
+
+
+
