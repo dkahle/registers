@@ -210,8 +210,8 @@ track_assignment <- function(symb = c("<-", "<+")) {
 untrack_assignment <- function() {
 
   # remove history registers and links in global
-  rm(list = history_symbols, envir = registers())
-  rm(list = history_symbols, envir =  .GlobalEnv)
+  suppressWarnings(rm(list = history_symbols, envir = registers()))
+  suppressWarnings(rm(list = history_symbols, envir =  .GlobalEnv))
 
   # remove assignment operators
   if (exists( "<-", envir = .GlobalEnv, inherits = FALSE)) rm("<-", envir = .GlobalEnv)
@@ -240,23 +240,60 @@ pause_tracking <- function() {
 
 #' @rdname tracking
 #' @export
-resume_tracking <- function() {
+resume_tracking <- function(symb = c("<-", "<+")) {
 
-  cli_alert_info("Tracking `<-` loaded to workspace")
+  # check for one of the allowable symbols
+  symb <- match.arg(symb)
 
-  new_assignment <- function(lhs, rhs) {
 
-    assign("name", substitute(lhs))
-    assign("value", eval(substitute(rhs), envir = parent.frame()))
+  # overwrite `<-`
+  if (symb == "<-") {
 
-    rset("..", rget("."))
-    rset(".", value)
-    # assignment_waterfall()
+    new_assignment <- function(lhs, rhs) {
 
-    assign(deparse(name), value, envir = parent.frame())
+      assign("name", substitute(lhs))
+      assign("value", eval(substitute(rhs), envir = parent.frame()))
+
+      rset("..", rget("."))
+      rset(".", value)
+      # assignment_waterfall()
+
+      assign(deparse(name), value, envir = parent.frame())
+    }
+
+    assign("<-", new_assignment, envir = .GlobalEnv)
+
   }
 
-  assign("<-", new_assignment, envir = .GlobalEnv)
+
+  # overwrite `<`
+  if (symb == "<+") {
+
+    new_assignment <- function(lhs, rhs) {
+
+      rhs_sub <- substitute(rhs)
+      rhs_string <- deparse(rhs_sub)
+      if (substring(rhs_string, 1, 1) != "+") return(!(lhs >= rhs))
+      rhs_string <- substring(rhs_string, 2) # remove leading "+"
+
+      assign("name", substitute(lhs))
+      assign("value", eval(parse(text = rhs_string), envir = parent.frame()))
+
+      rset("..", rget("."))
+      rset(".", value)
+      # assignment_waterfall()
+
+      assign(deparse(name), value, envir = parent.frame())
+
+    }
+
+    assign("<", new_assignment, envir = .GlobalEnv)
+
+  }
+
+
+  cli_alert_info("Tracking `{symb}` reloaded to workspace")
+
 
 }
 

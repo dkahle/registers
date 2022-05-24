@@ -21,7 +21,11 @@
 # spy below should be a generic
 #' @rdname set_register
 #' @export
-spy <- function(data, name = deparse(substitute(data))) {
+spy <- function(
+  data,
+  name = if (!is.null(attr(data, "name")))
+    attr(data, "name") else deparse(substitute(data))
+) {
 
   title <- glue("`{name}` [{paste(class(data), collapse = ', ')}]")
 
@@ -35,7 +39,7 @@ spy <- function(data, name = deparse(substitute(data))) {
     msg <- capture.output(dplyr::glimpse( dplyr::collect(data) ))
   }
 
-  print(boxx(msg, header = title, padding = 0, border_style = "round"))
+  print(boxx(msg, header = title, padding = 0, border_style = "round", border_col = "gray75"))
   invisible(data)
 
 }
@@ -44,39 +48,7 @@ spy <- function(data, name = deparse(substitute(data))) {
 
 
 
-#
-#
-# #' @rdname set_register
-# #' @export
-# spy_focus <- function() {
-#
-#   if (!rexists("f")) {
-#     cli_alert_danger("No focus has been set.") # if stop(), addin makes window
-#     return(invisible(NULL))
-#   }
-#
-#   f <- rget("f")
-#   data <- eval(f$name, envir = f$envir)
-#
-#   spy(data, deparse(f$name))
-#
-# }
-#
 
-
-
-
-#' @rdname set_register
-#' @export
-spy_highlighted <- function() {
-
-  context <- rstudioapi::getActiveDocumentContext()
-  highlighted_text <- context$selection[[1]]$text
-  highlighted_text <- ez_distill(highlighted_text)
-  data <- eval(parse(text = highlighted_text), envir = parent.frame())
-  spy(data, highlighted_text)
-
-}
 
 
 

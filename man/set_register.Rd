@@ -36,7 +36,6 @@
 \alias{ring_register_dot_on_highlighted}
 \alias{ring_register_dot_dot_on_highlighted}
 \alias{spy}
-\alias{spy_highlighted}
 \title{Registers}
 \usage{
 unset_register(key)
@@ -114,8 +113,6 @@ ring_register_dot_on_highlighted()
 ring_register_dot_dot_on_highlighted()
 
 spy(data, name = deparse(substitute(data)))
-
-spy_highlighted()
 }
 \arguments{
 \item{key}{Register name, a character}
@@ -167,7 +164,7 @@ registers()
 
 # ring_register() evaluates the chunk of code you've registered on demand
 ring_register("f")
-
+ring_register()
 
 # there's an addin to ring_register().
 # in RStudio, go to Tools > Modify Keyboard Shortcuts...
@@ -186,6 +183,9 @@ set_register(spy(), "g")
 registers()
 ring_register("dg")
 ring_register("dg 3")
+assigner <- function(x) assign("tmp", x, parent.frame(n = 3))
+set_register(assigner(), "f")
+ring_register("df")
 
 
 # registers are R code you want to make hotkeyable.
@@ -225,6 +225,7 @@ reset_registers()
 set_register(cars, "d")
 set_register(spy(), "g")
 set_register(ring_register("dg"), "1")
+registers()
 ring_register("1")
 
 
@@ -239,6 +240,8 @@ ring_register("1")
 # to Shift-Cmd-1 and so on.
 # (note: on a mac, you can change built-in OS bindings in System Preferences
 #        > Keyboard > Shortcuts)
+reset_registers()
+registers()
 set_register(spy(), "1")
 
 print_lm <- function(df) print(summary(lm(dist ~ speed, data = df)))
@@ -263,6 +266,20 @@ cars_sample
 
 
 
+
+# hint: your registers are almost entirely for interactive use. as you
+# use them more, you'll develop a habit for the kinds of things you
+# like to see (you'll probably know many off the bat).
+# this is a tool for you by you.
+# it seems to me like this one of the very few places where it's reasonable
+# to put your own default registers into your .Rprofile file.
+# you can use usethis::edit_r_profile() to get started
+# i recommend starting by adding these lines:
+# library("registers")
+set_register(spy(), "4") # map to Shift-Cmd-G
+
+# note: this rstudio webpage explains where rstudio keybindings are
+# stored: https://support.rstudio.com/hc/en-us/articles/206382178-Customizing-Keyboard-Shortcuts-in-the-RStudio-IDE
 
 
 spy(cars)

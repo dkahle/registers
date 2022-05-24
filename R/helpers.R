@@ -7,6 +7,7 @@ ez_trunc <- function(string, width, ellipsis = "\u2026") {
   string
 }
 # ez_trunc("Hello how are you today?", 10)
+# [1] "Hello how…"
 
 
 

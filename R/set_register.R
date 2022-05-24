@@ -33,9 +33,10 @@
 #'
 #' # ring_register() evaluates the chunk of code you've registered on demand
 #' ring_register("f")
+#' if (interactive()) ring_register()
 #'
 #'
-#' # there's an addin to ring_register().
+#' # there's an addin to ring_register() that will open the same window.
 #' # in RStudio, go to Tools > Modify Keyboard Shortcuts...
 #' # in the box type "ring", and change the shortcut of Ring register
 #' # to Cmd-R and click Apply. now push Cmd-R, type "f", and enter.
@@ -46,12 +47,15 @@
 #' registers()
 #'
 #'
-#' # with this you can compose registers
+#' # you can compose registers by listing several keys in ring_register()
 #' set_register(cars, "d")
 #' set_register(spy(), "g")
 #' registers()
 #' ring_register("dg")
 #' ring_register("dg 3")
+#' assigner <- function(x) assign("tmp", x, parent.frame(n = 3))
+#' set_register(assigner(), "f")
+#' ring_register("df")
 #'
 #'
 #' # registers are R code you want to make hotkeyable.
@@ -91,6 +95,7 @@
 #' set_register(cars, "d")
 #' set_register(spy(), "g")
 #' set_register(ring_register("dg"), "1")
+#' registers()
 #' ring_register("1")
 #'
 #'
@@ -105,6 +110,8 @@
 #' # to Shift-Cmd-1 and so on.
 #' # (note: on a mac, you can change built-in OS bindings in System Preferences
 #' #        > Keyboard > Shortcuts)
+#' reset_registers()
+#' registers()
 #' set_register(spy(), "1")
 #'
 #' print_lm <- function(df) print(summary(lm(dist ~ speed, data = df)))
@@ -130,6 +137,21 @@
 #'
 #'
 #'
+#' # hint: your registers are almost entirely for interactive use. as you
+#' # use them more, you'll develop a habit for the kinds of things you
+#' # like to see (you'll probably know many off the bat).
+#' # this is a tool for you by you.
+#' # it seems to me like this one of the very few places where it's reasonable
+#' # to put your own default registers into your .Rprofile file.
+#' # you can use usethis::edit_r_profile() to get started
+#' # i recommend starting by adding these lines:
+#' # library("registers")
+#' set_register(spy(), "4") # map to Shift-Cmd-G
+#'
+#' # note: this rstudio webpage explains where rstudio keybindings are
+#' # stored: https://support.rstudio.com/hc/en-us/articles/206382178-Customizing-Keyboard-Shortcuts-in-the-RStudio-IDE
+#'
+
 
 
 
@@ -273,17 +295,12 @@ ring_register <- function(key) {
         out <- eval(n, envir = e)
       }
     } else if (
-      deparse(n) %in% ls(e, all.names = TRUE) &&
-        bindingIsActive(deparse(n), e)
+      (deparse(n) %in% ls(e, all.names = TRUE)) && bindingIsActive(deparse(n), e)
     ) {
       stop("not yet implemented")
     } else {
-      val <- eval(n, envir =e)
-      out <- if (is.function(val)) {
-        val(out)
-      } else {
-        val
-      }
+      val <- eval(n, envir = e)
+      out <- if (is.function(val)) val(out) else val
     }
 
   }
@@ -292,147 +309,6 @@ ring_register <- function(key) {
   invisible(out)
 
 }
-
-
-
-#
-#
-# #' @rdname set_register
-# #' @export
-# set_focus <- function(x) {
-#
-#   eval(
-#     substitute(
-#       registers::set_register(x, "f", clobber = get_registers_option("clobber"), envir = parent.frame(n = 3))
-#     ),
-#     envir = parent.frame()
-#   )
-#
-# }
-#
-#
-#
-# #' @rdname set_register
-# #' @export
-# set_focus_highlighted <- function() {
-#
-#   context <- rstudioapi::getActiveDocumentContext()
-#   x <- context$selection[[1]]$text
-#
-#   cli_alert_success("Focusing on `{x}`...")
-#
-#   eval(
-#     substitute(
-#       registers::set_register(expr, "f", clobber = get_registers_option("clobber"), envir = parent.frame(n = 3)),
-#       list(expr = as.name(x))
-#     ),
-#     envir = parent.frame()
-#   )
-#
-# }
-#
-#
-#
-# #' @rdname set_register
-# #' @export
-# set_focus_window <- function() {
-#
-#   x <- rstudioapi::showPrompt(
-#     title = "Set focus",
-#     message = "Name of the R object to focus on?"
-#   )
-#
-#   cli_alert_success("Focusing on `{x}`...")
-#
-#   eval(
-#     substitute(
-#       registers::set_register(expr, "f", clobber = get_registers_option("clobber"), envir = parent.frame(n = 3)),
-#       list(expr = as.name(x))
-#     ),
-#     envir = parent.frame()
-#   )
-#
-# }
-#
-#
-#
-
-
-
-
-
-
-#
-# set_number_register <- function(key) {
-#
-#   function(x) {
-#
-#     if (is.expression(key)) key <- deparse(key)
-#     if (is.numeric(key)) key <- as.character(key)
-#
-#     eval(
-#       substitute(
-#         registers::set_register(
-#           x,
-#           key,
-#           clobber = get_registers_option("clobber"),
-#           envir = parent.frame(n = 3)
-#         ),
-#         list(
-#           x = substitute(x),
-#           key = key
-#         )
-#       ),
-#       envir = parent.frame()
-#     )
-#
-#     x_formatted <- ez_trunc(ez_distill(deparse(substitute(x))), console_width() - 22L)
-#     cli_alert_success(glue("Register {key} set to `{x_formatted}`"))
-#
-#   }
-#
-# }
-#
-#
-# #' @rdname set_register
-# #' @export
-# set_register_1 <- set_number_register("1")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_2 <- set_number_register("2")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_3 <- set_number_register("3")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_4 <- set_number_register("4")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_5 <- set_number_register("5")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_6 <- set_number_register("6")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_7 <- set_number_register("7")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_8 <- set_number_register("8")
-#
-# #' @rdname set_register
-# #' @export
-# set_register_9 <- set_number_register("9")
-#
-
-
-
 
 
 

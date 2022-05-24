@@ -13,7 +13,6 @@
 #' registers()
 #' set_register(a <- rnorm(1), "a")
 #' registers()
-#' show_registers()
 #' ls(registers())
 #'
 #' # in RStudio, go to Tools > Modify Keyboard Shortcuts...

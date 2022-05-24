@@ -21,7 +21,7 @@ untrack_assignment()
 
 pause_tracking()
 
-resume_tracking()
+resume_tracking(symb = c("<-", "<+"))
 }
 \arguments{
 \item{symb}{Symbol to use for tracked assignment, either \code{"<-"} (default) or
