@@ -9,42 +9,39 @@
 #' @examples
 #'
 #' spy(cars)
+#' spy_top(cars)
+#' spy_btm(cars)
+#' spy_all(cars)
+#' spy_all(ggplot2::diamonds)
 #'
-#' # Shift-Cmd-H
+#' # in .Rprofile, set
+#' set_register(    spy(), "4") # map to Shift-Cmd-G
+#' set_register(spy_top(), "5") # map to Shift-Cmd-H
+#' set_register(spy_btm(), "6") # map to Shift-Cmd-J
+#' set_register(spy_all(), "7") # map to Shift-Cmd-A
+#'
+#' # highlight cars, then Shift-Cmd-(G,H,J,A)
 #' cars
 #'
 
 
 
 
-
-# spy below should be a generic
-#' @rdname set_register
+#' @rdname spy
 #' @export
-spy <- function(
-  data,
-  name = if (!is.null(attr(data, "name")))
-    attr(data, "name") else deparse(substitute(data))
-) {
-
-  title <- glue("`{name}` [{paste(class(data), collapse = ', ')}]")
-
-  if (inherits(data, "data.frame")) {
-    msg <- capture.output(dplyr::glimpse(data))
-  } else if (is.vector(data)) {
-    msg <- capture.output(str(data))
-  } else if (is.function(data)) {
-    msg <- capture.output(print(data))
-  } else {
-    msg <- capture.output(dplyr::glimpse( dplyr::collect(data) ))
-  }
-
-  print(boxx(msg, header = title, padding = 0, border_style = "round", border_col = "gray75"))
-  invisible(data)
-
+spy <- function(...) {
+  UseMethod("spy")
 }
-# spy(mtcars)
-# spy(cars)
+
+
+#' @rdname spy
+#' @export
+spy.data.frame <- function(x, name = deparse(substitute(x))) {
+  title <- glue("`{name}` [{paste(class(x), collapse = ', ')}]")
+  msg <- capture.output(dplyr::glimpse(x))
+  print(boxx(msg, header = title, padding = 0, border_style = "round", border_col = "gray75"))
+  invisible(x)
+}
 
 
 
@@ -52,4 +49,83 @@ spy <- function(
 
 
 
+
+
+
+#' @rdname spy
+#' @export
+spy_top <- function(...) {
+  UseMethod("spy_top")
+}
+
+
+#' @rdname spy
+#' @export
+spy_top.data.frame <- function(df, n = 20) {
+  msg <- capture.output(print(tibble::as_tibble(df), n = n))[-1]
+  print(
+    cli::boxx(
+      msg,
+      padding = 0,
+      border_style = "round",
+      border_col = "gray75",
+      header = glue::glue("{nrow(df)} \u00d7 {ncol(df)}")
+    )
+  )
+}
+
+
+
+
+
+
+
+
+
+
+#' @rdname spy
+#' @export
+spy_btm <- function(...) {
+  UseMethod("spy_btm")
+}
+
+
+#' @rdname spy
+#' @export
+spy_btm.data.frame <- function(df, n = 20) {
+  tb <- tibble::as_tibble(df[nrow(df):1,])
+  msg <- capture.output(print(tb, n = n))[-1]
+  print(
+    cli::boxx(
+      msg,
+      padding = 0,
+      border_style = "round",
+      border_col = "gray75",
+      header = glue::glue("{nrow(df)} \u00d7 {ncol(df)} in reverse")
+    )
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+#' @rdname spy
+#' @export
+spy_all <- function(...) {
+  UseMethod("spy_all")
+}
+
+
+#' @rdname spy
+#' @export
+spy_all.data.frame <- function(df) {
+  spy_top.data.frame(df, n = getOption("max.print") - 5L)
+}
 

@@ -246,6 +246,8 @@ ring_register <- function(key) {
 
   if (is.null(key)) return(invisible())
 
+  if (is.numeric(key)) key <- as.character(key)
+
   registers <- strsplit(key, "")[[1]]
 
   if (any(registers == " ")) {
@@ -324,16 +326,19 @@ ring_numbered_register <- function(key) {
     if (is.numeric(key)) key <- as.character(key)
 
     if (!rexists(key)) {
-      cli_alert_danger(glue("Register {key} has key been set.")) # if stop(), addin makes window
+      cli_alert_danger(glue("Register {key} has not key been set.")) # if stop(), addin makes window
       return(invisible(NULL))
     }
 
     f <- rget(key)
 
     # message(glue("Evaluating {capture.output(print(f$name))} in {capture.output(print(f$envir))}"))
-    data <- eval(f$name, envir = f$envir)
+    tryCatch(
+      eval(f$name, envir = f$envir),
+      error = function(e) cli_alert_danger(glue("Ringing {key} failed."))
+    )
 
-    return(invisible(data))
+    return(invisible(NULL))
 
   }
 
