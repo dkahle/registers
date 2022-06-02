@@ -202,7 +202,7 @@ set_register <- function(
     "x" = key,
     "value" = structure(
       list("name" = substitute(x), "envir" = envir),
-      dynamic_register = TRUE
+      active_register = TRUE
     )
   )
 
@@ -210,25 +210,7 @@ set_register <- function(
 
 
 
-#
-#
-# #' @rdname set_register
-# #' @export
-# set_static_register <- function(x, key, clobber = get_registers_option("clobber")) {
-#
-#   if (!is_valid_key(key)) { message("Key `{key}` not valid."); return(invisible()) }
-#
-#   if (is_registered(key) && isFALSE(clobber)) {
-#     message(glue("Key {key} already registered."))
-#     return(invisible())
-#   }
-#
-#   rset("x" = key, "value" = x)
-#
-# }
-#
-#
-#
+
 
 
 

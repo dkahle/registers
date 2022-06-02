@@ -63,15 +63,12 @@ is_registered <- function(key) {
 
 
 
-is_dynamic_register <- function(x) {
-  . <- attr(x, "dynamic_register")
+is_active_register <- function(x) {
+  . <- attr(x, "active_register")
   !is.null(.) && isTRUE(.)
 }
 
-is_imperative <- function(x) {
-  . <- attr(x, "imperative")
-  !is.null(.) && isTRUE(.)
-}
+
 
 `%notin%` <- function(x, y) {
   !(x %in% y)

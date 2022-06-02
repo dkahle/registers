@@ -3,6 +3,7 @@
 \name{spy}
 \alias{spy}
 \alias{spy.data.frame}
+\alias{spy.character}
 \alias{spy_top}
 \alias{spy_top.data.frame}
 \alias{spy_btm}
@@ -11,26 +12,32 @@
 \alias{spy_all.data.frame}
 \title{Spy}
 \usage{
-spy(...)
+spy(x, ...)
 
-\method{spy}{data.frame}(x, name = deparse(substitute(x)))
+\method{spy}{data.frame}(x, ..., name = deparse(substitute(x)))
 
-spy_top(...)
+\method{spy}{character}(x, ..., name = deparse(substitute(x)))
 
-\method{spy_top}{data.frame}(df, n = 20)
+spy_top(x, ...)
 
-spy_btm(...)
+\method{spy_top}{data.frame}(x, ..., n = 20)
 
-\method{spy_btm}{data.frame}(x, name = deparse(substitute(x)))
+spy_btm(x, ...)
 
-spy_all(...)
+\method{spy_btm}{data.frame}(x, ..., n = 20)
 
-\method{spy_all}{data.frame}(df)
+spy_all(x, ...)
+
+\method{spy_all}{data.frame}(x, ..., n = getOption("max.print") - 5L)
 }
 \arguments{
-\item{name}{The binding name to focus on, as a string}
+\item{x}{Object to be printed}
 
-\item{data}{A dataset (or expression that returns one)}
+\item{...}{Additional arguments, currently discarded}
+
+\item{name}{Name of object to be printed}
+
+\item{n}{For data frames, rows to be printed}
 }
 \value{
 Invisible \code{NULL}
@@ -44,9 +51,15 @@ spy(cars)
 spy_top(cars)
 spy_btm(cars)
 spy_all(cars)
-spy_all(ggplot2::diamonds)
+# spy_all(ggplot2::diamonds)
 
-# Shift-Cmd-H
+# in .Rprofile, set
+set_register(    spy(), "4") # map to Shift-Cmd-G
+set_register(spy_top(), "5") # map to Shift-Cmd-H
+set_register(spy_btm(), "6") # map to Shift-Cmd-J
+set_register(spy_all(), "7") # map to Shift-Cmd-A
+
+# highlight cars, then Shift-Cmd-(G,H,J,A)
 cars
 
 }

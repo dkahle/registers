@@ -60,17 +60,9 @@ show_registers <- function() {
 #' @rdname registers
 #' @export
 print.registers <- function(x, ...) {
+
   cli_h1("Registers")
   register_names <- ls(registers(), all.names = TRUE)
-
-  # put . next to ..
-  if ("." %in% register_names && ".." %in% register_names) {
-    ndx_.. <- which(".." == register_names)
-    .. <- register_names[ndx_..]
-    register_names <- register_names[-ndx_..]
-    ndx_.  <- which("." == register_names)
-    register_names <- c(register_names[1:ndx_.], .., register_names[(ndx_.+1):length(register_names)])
-  }
 
   # print
   if (length(register_names) > 0) {

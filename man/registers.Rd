@@ -16,10 +16,10 @@
 \alias{register_inline_summary.default}
 \alias{registers}
 \alias{show_registers}
+\alias{print.registers}
 \alias{reset_registers}
 \alias{set_registers_option}
 \alias{get_registers_option}
-\alias{print.registers}
 \alias{package-registers}
 \title{Registers inline summaries}
 \usage{
@@ -47,13 +47,13 @@ registers()
 
 show_registers()
 
+\method{print}{registers}(x, ...)
+
 reset_registers()
 
 set_registers_option(...)
 
 get_registers_option(option)
-
-\method{print}{registers}(x, ...)
 }
 \arguments{
 \item{x}{An object of class \code{registers}}
