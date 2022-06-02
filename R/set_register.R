@@ -423,13 +423,12 @@ set_register_highlighted <- function(key, message = TRUE) {
           expr = parse(text = x)[[1]],
           key = key
         )
-      )
-      ,
+      ),
       envir = parent.frame()
     )
 
     x_formatted <- ez_trunc(ez_distill(x), console_width() - 22L)
-    if (message) cli_alert_success(glue("Register {key} set to `{x_formatted}`"))
+    if (message) cli_alert_success("Register {key} set to `{x_formatted}`")
 
     invisible(x)
 
