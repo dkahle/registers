@@ -46,6 +46,7 @@ registers <- function() {
 
 #' @rdname registers
 #' @export
+
 show_registers <- function() {
 
   x <- registers()
@@ -53,6 +54,56 @@ show_registers <- function() {
   invisible(x)
 
 }
+
+
+
+#' @rdname registers
+#' @export
+print.registers <- function(x, ...) {
+  cli_h1("Registers")
+  register_names <- ls(registers(), all.names = TRUE)
+
+  # put . next to ..
+  if ("." %in% register_names && ".." %in% register_names) {
+    ndx_.. <- which(".." == register_names)
+    .. <- register_names[ndx_..]
+    register_names <- register_names[-ndx_..]
+    ndx_.  <- which("." == register_names)
+    register_names <- c(register_names[1:ndx_.], .., register_names[(ndx_.+1):length(register_names)])
+  }
+
+  # print
+  if (length(register_names) > 0) {
+    cli_div(theme = list(
+      span.register = list(color = "firebrick"),
+      span.name = list(color = "black"),
+      span.envir = list(color = "gray"),
+      span.value = list(color = "steelblue")
+    ))
+    for (register in register_names) {
+      if (register %in% history_symbols) {
+        value <- rget(register)
+        cli_alert("{.emph {.register {register}}}: {.value {register_inline_summary(value)}}")
+      } else {
+        name <- paste0(ez_trim(deparse(rget(register)$name)), collapse = " ")
+        envir <- rget(register)$envir
+        cli_alert("{.emph {.register {register}}}: {.name {name}} {.envir {capture.output(print(envir))}}")
+      }
+    }
+    cli_end()
+  } else {
+    cli_div(theme = list(span.key = list(color = "gray")))
+    cli_text("{.key No bindings are registered.}")
+    cli_end()
+  }
+  cat("\n")
+  x
+}
+
+
+
+
+
 
 
 
@@ -102,55 +153,6 @@ get_registers_option <- function(option) {
 
   getOption("registers")$options[[option]]
 
-}
-
-
-
-
-
-
-
-#' @rdname registers
-#' @export
-print.registers <- function(x, ...) {
-  cli_h1("Registers")
-  register_names <- ls(registers(), all.names = TRUE)
-
-  # put . next to ..
-  if ("." %in% register_names && ".." %in% register_names) {
-    ndx_.. <- which(".." == register_names)
-    .. <- register_names[ndx_..]
-    register_names <- register_names[-ndx_..]
-    ndx_.  <- which("." == register_names)
-    register_names <- c(register_names[1:ndx_.], .., register_names[(ndx_.+1):length(register_names)])
-  }
-
-  # print
-  if (length(register_names) > 0) {
-    cli_div(theme = list(
-      span.register = list(color = "firebrick"),
-      span.name = list(color = "black"),
-      span.envir = list(color = "gray"),
-      span.value = list(color = "steelblue")
-    ))
-    for (register in register_names) {
-      if (register %in% history_symbols) {
-        value <- rget(register)
-        cli_alert("{.emph {.register {register}}}: {.value {register_inline_summary(value)}}")
-      } else {
-        name <- deparse(rget(register)$name)
-        envir <- rget(register)$envir
-        cli_alert("{.emph {.register {register}}}: {.name {name}} {.envir {capture.output(print(envir))}}")
-      }
-    }
-    cli_end()
-  } else {
-    cli_div(theme = list(span.key = list(color = "gray")))
-    cli_text("{.key No bindings are registered.}")
-    cli_end()
-  }
-  cat("\n")
-  x
 }
 
 
