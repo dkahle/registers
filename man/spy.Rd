@@ -3,6 +3,7 @@
 \name{spy}
 \alias{spy}
 \alias{spy.data.frame}
+\alias{spy.list}
 \alias{spy.character}
 \alias{spy_top}
 \alias{spy_top.data.frame}
@@ -15,6 +16,8 @@
 spy(x, ...)
 
 \method{spy}{data.frame}(x, ..., name = deparse(substitute(x)))
+
+\method{spy}{list}(x, ..., name = deparse(substitute(x)))
 
 \method{spy}{character}(x, ..., name = deparse(substitute(x)))
 

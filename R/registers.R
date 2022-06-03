@@ -75,7 +75,7 @@ print.registers <- function(x, ...) {
     for (register in register_names) {
       if (register %in% history_symbols) {
         value <- rget(register)
-        cli_alert("{.emph {.register {register}}}: {.value {register_inline_summary(value)}}")
+        cli_alert("{.emph {.register {register}}}: {.value {capture.output(spy_inline(value))}}")
       } else {
         name <- paste0(ez_trim(deparse(rget(register)$name)), collapse = " ")
         envir <- rget(register)$envir

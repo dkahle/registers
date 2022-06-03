@@ -49,6 +49,17 @@ spy.data.frame <- function(x, ..., name = deparse(substitute(x))) {
 
 #' @rdname spy
 #' @export
+spy.list <- function(x, ..., name = deparse(substitute(x))) {
+  title <- glue("`{name}` {paste(class(x), collapse = ', ')} [{length(x)}]")
+  msg <- ez_trunc(capture.output(cat(x)), width = console_width() - 2L)
+  print(boxx(msg, header = title, padding = 0, border_style = "round", border_col = "gray75"))
+  invisible(x)
+}
+
+
+
+#' @rdname spy
+#' @export
 spy.character <- function(x, ..., name = deparse(substitute(x))) {
   title <- glue("`{name}` {paste(class(x), collapse = ', ')} [{length(x)}]")
   msg <- ez_trunc(capture.output(cat(x)), width = console_width() - 2L)
