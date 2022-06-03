@@ -49,6 +49,14 @@ register_inline_summary <- function(x, ...) {
 }
 
 
+convert_nas <- function(x) {
+  replacement_na <- paste0(" ", na_char(), " ")
+  while (grepl(" NA ", x, fixed = TRUE)) {
+    x <- gsub(" NA ", replacement_na, x, fixed = TRUE)
+  }
+  x
+}
+
 
 #' @rdname registers
 #' @export
@@ -57,10 +65,10 @@ register_inline_summary.character <- function(x, ...) {
   ez_trunc(
     if (n == 0L) {
       "character(0)"
-    } else if (n == 1L) {
-      paste(glue("chr"), paste(x, collapse = ", "))
     } else {
-      paste(glue("chr[1:{n}]"), paste(x, collapse = ", "))
+      convert_nas(
+        paste(glue("chr[{n}]"), paste(x, collapse = " "))
+      )
     },
     console_width() - 5L
   )
@@ -68,7 +76,7 @@ register_inline_summary.character <- function(x, ...) {
 # register_inline_summary(character(0))
 # register_inline_summary("a")
 # register_inline_summary(sample(letters, 100, rep = TRUE))
-# register_inline_summary(sample(c(letters, NA), 100, rep = TRUE))
+# register_inline_summary(sample(c(letters, rep(NA, 10)), 100, rep = TRUE))
 
 
 
@@ -79,10 +87,10 @@ register_inline_summary.numeric <- function(x, ...) {
   ez_trunc(
     if (n == 0L) {
       "numeric(0)"
-    } else if (n == 1L) {
-      paste(glue("num"), paste(round(x, digits = 3), collapse = ", "))
     } else {
-      paste(glue("num[1:{n}]"), paste(round(x, digits = 3), collapse = ", "))
+      convert_nas(
+        paste(glue("num[{n}]"), paste(round(x, digits = 3), collapse = " "))
+      )
     },
     console_width() - 5L
   )
@@ -101,10 +109,10 @@ register_inline_summary.logical <- function(x, ...) {
   ez_trunc(
     if (n == 0L) {
       "logical(0)"
-    } else if (n == 1L) {
-      paste(glue("logi"), paste(x, collapse = ", "))
     } else {
-      paste(glue("logi[1:{n}]"), paste(x, collapse = ", "))
+      convert_nas(
+        paste(glue("lgl[{n}]"), paste(ifelse(x, "T", "F"), collapse = " "))
+      )
     },
     console_width() - 5L
   )
@@ -112,7 +120,9 @@ register_inline_summary.logical <- function(x, ...) {
 # register_inline_summary(logical(0))
 # register_inline_summary(TRUE)
 # register_inline_summary(FALSE)
+# register_inline_summary(c(TRUE, FALSE, TRUE))
 # register_inline_summary(sample(c(T, F, NA), 100, TRUE))
+# register_inline_summary(c(T, NA, NA, NA, F))
 
 
 

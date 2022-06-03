@@ -74,3 +74,43 @@ is_active_register <- function(x) {
   !(x %in% y)
 }
 
+
+
+
+registers_option_exists <- function() {
+  !is.null(getOption("registers"))
+}
+
+
+na_char <- function() {
+
+  if (!registers_option_exists()) {
+    cur_options <- getOption("registers")
+    cur_options$options$na_char
+  } else {
+    "_" # default to _
+  }
+
+}
+
+
+set_na_char <- function(x) {
+
+  stopifnot(is.character(x), length(x) == 1L)
+
+  if (!registers_option_exists()) {
+
+    cli_alert_danger("registers options do not exist.")
+
+  } else {
+
+    cur_options <- getOption("registers")
+    cur_options$options$na_char <- x
+    options("registers" = cur_options)
+    cli_alert_success("registsers NA character set to {x}")
+
+  }
+
+  invisible()
+
+}
